@@ -50,11 +50,13 @@ const en = {
   splitPositive: 'Positive',
   splitStrengthLabel: 'Split strength',
 
+  statEffort: 'Effort model',
   statDistance: 'Distance',
   statAscent: 'Ascent',
   statDescent: 'Descent',
   statTime: 'Total time',
   statPace: 'Avg pace',
+  statBasePace: 'Flat equiv. pace',
 
   chartXLabel: 'Distance (km)',
   chartYLabel: 'Elevation (m)',

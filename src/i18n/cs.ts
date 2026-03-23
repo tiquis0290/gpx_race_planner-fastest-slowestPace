@@ -50,11 +50,13 @@ const cs = {
   splitPositive: 'Pozitivní',
   splitStrengthLabel: 'Síla splitu',
 
+  statEffort: 'Model úsilí',
   statDistance: 'Vzdálenost',
   statAscent: 'Stoupání',
   statDescent: 'Klesání',
   statTime: 'Celkový čas',
   statPace: 'Prům. tempo',
+  statBasePace: 'Tempo na rovině',
 
   chartXLabel: 'Vzdálenost (km)',
   chartYLabel: 'Výška (m)',
