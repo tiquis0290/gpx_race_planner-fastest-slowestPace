@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Nápověda – GPX Race Planner</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: system-ui, 'Segoe UI', Roboto, sans-serif;
+      background: #f8fafc;
+      color: #1e293b;
+      line-height: 1.7;
+    }
+    .page {
+      max-width: 820px;
+      margin: 0 auto;
+      padding: 2rem 1.5rem 4rem;
+    }
+    header {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      margin-bottom: 2rem;
+      padding-bottom: 1rem;
+      border-bottom: 2px solid #e2e8f0;
+    }
+    header .icon { font-size: 2rem; color: #3b82f6; }
+    header h1 { margin: 0; font-size: 1.6rem; color: #1e293b; }
+    h2 {
+      font-size: 1.15rem;
+      color: #3b82f6;
+      margin: 2rem 0 0.5rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    h2::before {
+      content: '';
+      display: inline-block;
+      width: 4px;
+      height: 1.1em;
+      background: #3b82f6;
+      border-radius: 2px;
+    }
+    p { margin: 0.4rem 0 0.8rem; color: #374151; }
+    ol, ul { margin: 0.4rem 0 1rem; padding-left: 1.5rem; }
+    li { margin-bottom: 0.35rem; color: #374151; }
+    .callout {
+      background: #eff6ff;
+      border: 1px solid #bfdbfe;
+      border-radius: 8px;
+      padding: 0.9rem 1.1rem;
+      margin: 1rem 0;
+      color: #1d4ed8;
+    }
+    .callout strong { color: #1e40af; }
+    .warning {
+      background: #fff7ed;
+      border: 1px solid #fed7aa;
+      border-radius: 8px;
+      padding: 0.9rem 1.1rem;
+      margin: 1rem 0;
+      color: #9a3412;
+    }
+    .badge {
+      display: inline-block;
+      padding: 0.15rem 0.55rem;
+      border-radius: 999px;
+      font-size: 0.78rem;
+      font-weight: 600;
+      vertical-align: middle;
+    }
+    .badge-red    { background: #fee2e2; color: #991b1b; }
+    .badge-green  { background: #dcfce7; color: #166534; }
+    .badge-gray   { background: #f1f5f9; color: #475569; }
+    a { color: #3b82f6; text-decoration: none; }
+    a:hover { text-decoration: underline; }
+    .ext-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.35rem;
+      background: #3b82f6;
+      color: #fff;
+      padding: 0.45rem 1rem;
+      border-radius: 6px;
+      font-weight: 600;
+      font-size: 0.9rem;
+      text-decoration: none;
+      margin-top: 0.5rem;
+    }
+    .ext-link:hover { background: #2563eb; text-decoration: none; }
+    code {
+      background: #f1f5f9;
+      border-radius: 4px;
+      padding: 0.1em 0.45em;
+      font-size: 0.88em;
+      color: #0f172a;
+    }
+    .step-grid {
+      display: grid;
+      grid-template-columns: 2rem 1fr;
+      gap: 0.4rem 0.75rem;
+      margin: 0.5rem 0 1rem;
+    }
+    .step-num {
+      width: 2rem;
+      height: 2rem;
+      border-radius: 50%;
+      background: #3b82f6;
+      color: #fff;
+      font-weight: 700;
+      font-size: 0.85rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      margin-top: 0.1rem;
+    }
+    .step-text { padding-top: 0.25rem; color: #374151; }
+    hr { border: none; border-top: 1px solid #e2e8f0; margin: 2rem 0; }
+  </style>
+</head>
+<body>
+<div class="page">
+
+  <header>
+    <span class="icon">🗺️</span>
+    <h1>GPX Race Planner – Nápověda</h1>
+  </header>
+
+  <h2>Co aplikace dělá</h2>
+  <p>
+    GPX Race Planner umožňuje sestavit <strong>tempový plán</strong> pro závod nebo trénink.
+    Trasu zadáte buď nahráním <code>.gpx</code> souboru, nebo ručně jako posloupnost úseků
+    s délkou a převýšením. Výsledkem je seznam úseků s doporučeným tempem, který lze exportovat
+    jako workout přímo do Garmin Connect.
+  </p>
+
+  <hr />
+
+  <h2>Požadavky</h2>
+  <div class="callout">
+    <strong>Prohlížeč Google Chrome</strong> – export do Garmin Connect vyžaduje Chrome rozšíření,
+    které je dostupné pouze pro Chrome (a Chromium prohlížeče jako Edge nebo Brave).
+  </div>
+
+  <h2>Instalace Chrome rozšíření</h2>
+  <p>
+    Pro import tempového plánu do Garmin Connect je potřeba nainstalovat rozšíření
+    <strong>Share Your Garmin Connect</strong>:
+  </p>
+  <a class="ext-link"
+     href="https://chromewebstore.google.com/detail/share-your-garmin-connect/kdpolhnlnkengkmfncjdbfdehglepmff"
+     target="_blank" rel="noopener">
+    ↗ Otevřít v Chrome Web Store
+  </a>
+  <p style="margin-top:0.8rem;">
+    Po instalaci se v Chrome zobrazí ikona rozšíření. Přes ni lze importovat stažený
+    <code>.json</code> soubor přímo do vašeho Garmin Connect účtu.
+  </p>
+
+  <hr />
+
+  <h2>Postup – GPX soubor</h2>
+
+  <div class="step-grid">
+    <div class="step-num">1</div>
+    <div class="step-text">
+      Přepněte přepínač na <strong>GPX soubor</strong> (výchozí stav)
+      a nahrajte <code>.gpx</code> soubor trasy přetažením nebo kliknutím.
+    </div>
+
+    <div class="step-num">2</div>
+    <div class="step-text">
+      Aplikace automaticky rozčlení trasu na úseky podle sklonu
+      (<span class="badge badge-red">stoupání</span>
+       <span class="badge badge-green">klesání</span>
+       <span class="badge badge-gray">rovina</span>).
+      Nastavte <em>vyhlazení</em>, <em>práh sklonu</em> a <em>min. délku úseku</em> dle potřeby.
+    </div>
+
+    <div class="step-num">3</div>
+    <div class="step-text">
+      Zadejte <strong>cílové tempo</strong> (min:ss&nbsp;/&nbsp;km) nebo
+      <strong>cílový celkový čas</strong> (h:mm:ss).
+    </div>
+
+    <div class="step-num">4</div>
+    <div class="step-text">
+      Zvolte <strong>model úsilí</strong> (Lineární / Mocninný / Exponenciální / Minetti)
+      a nastavte korekce pro stoupání a klesání.
+      Volitelně přidejte split strategii (negativní / even / pozitivní).
+    </div>
+
+    <div class="step-num">5</div>
+    <div class="step-text">
+      V tabulce <em>Tempový plán</em> zkontrolujte tempa pro každý úsek.
+      Najetím myši na řádek úseku se zvýrazní odpovídající část na mapě i v grafu.
+    </div>
+
+    <div class="step-num">6</div>
+    <div class="step-text">
+      Klikněte na <strong>Stáhnout Garmin Workout</strong> (tlačítko v menu nebo pravém rohu).
+      Stáhne se soubor <code>.json</code>.
+    </div>
+
+    <div class="step-num">7</div>
+    <div class="step-text">
+      Klikněte na ikonu rozšíření <strong>Share Your Garmin Connect</strong> v Chrome
+      a importujte stažený <code>.json</code> do Garmin Connect.
+    </div>
+  </div>
+
+  <hr />
+
+  <h2>Postup – Ruční zadání</h2>
+
+  <div class="step-grid">
+    <div class="step-num">1</div>
+    <div class="step-text">
+      Přepněte přepínač na <strong>Ručně</strong>.
+    </div>
+
+    <div class="step-num">2</div>
+    <div class="step-text">
+      Pro každý úsek zadejte <strong>délku (km)</strong> a <strong>převýšení (m nebo %)</strong>.
+      Typ úseku (stoupání / klesání / rovina) se určí automaticky z hodnot.
+      Klikněte na <strong>+</strong> pro přidání.
+    </div>
+
+    <div class="step-num">3</div>
+    <div class="step-text">
+      Úseky lze editovat tlačítkem tužky – formulář přejde do editačního režimu.
+      Potvrďte zaškrtnutím nebo stisknutím <kbd>Enter</kbd>, zrušte klávesou <kbd>Esc</kbd>.
+    </div>
+
+    <div class="step-num">4</div>
+    <div class="step-text">
+      Dále postupujte stejně jako u GPX varianty (kroky 3–7 výše).
+    </div>
+  </div>
+
+  <hr />
+
+  <h2>Nastavení úsilí</h2>
+  <ul>
+    <li><strong>Lineární</strong> – tempo roste přímo úměrně sklonu. Jednoduché a předvídatelné.</li>
+    <li><strong>Mocninný</strong> – mírné kopce penalizuje méně, strmé více. Parametr <em>exponent n</em> řídí zakřivení.</li>
+    <li><strong>Exponenciální</strong> – ještě výraznější rozdíl mezi mírným a strmým sklonem.</li>
+    <li><strong>Minetti</strong> – biomechanický model (Minetti et al. 2002) bez dalších parametrů. Nejrealističtější, ale také nejméně přizpůsobitelný.</li>
+  </ul>
+
+  <h2>Split strategie</h2>
+  <ul>
+    <li><strong>Negativní split</strong> – začínáte pomaleji, v druhé polovině zrychlujete.</li>
+    <li><strong>Even split</strong> – rovnoměrné tempo po celou dobu (výchozí).</li>
+    <li><strong>Pozitivní split</strong> – začínáte rychleji, ke konci zpomalujete.</li>
+  </ul>
+  <p>Parametr <em>síla splitu</em> určuje, jak výrazný je rozdíl mezi začátkem a koncem.</p>
+
+  <hr />
+
+  <p style="color:#94a3b8; font-size:0.82rem; text-align:center;">
+    GPX Race Planner &nbsp;·&nbsp; demo: <a href="https://gpx.martinkobelka.cz" target="_blank">gpx.martinkobelka.cz</a>
+  </p>
+
+</div>
+</body>
+</html>
