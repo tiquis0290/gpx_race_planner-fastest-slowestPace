@@ -28,7 +28,7 @@ const PaceSettings: React.FC = () => {
       if (totalDistance > 0 && targetTimeSeconds > 0) setPaceInput(formatPace(targetTimeSeconds / (totalDistance / 1000)));
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [targetMode]);
+  }, [targetMode, totalDistance]);
 
   const handlePaceChange = useCallback((val: string) => {
     setPaceInput(val);

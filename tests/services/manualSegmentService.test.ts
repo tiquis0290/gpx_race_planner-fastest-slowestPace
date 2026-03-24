@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
-import { autoType, manualInputsToSegments, manualInputsToGpxPoints } from './manualSegmentService';
-import type { ManualSegmentInput } from '../types/index';
+import { autoType, manualInputsToSegments, manualInputsToGpxPoints } from '../../src/services/manualSegmentService';
+import type { ManualSegmentInput } from '../../src/types/index';
 
 describe('autoType', () => {
   it('returns uphill when slope exceeds threshold', () => {

@@ -2,11 +2,11 @@ import { describe, it, expect } from 'vitest';
 import { render, screen } from '@testing-library/react';
 import { Provider } from 'react-redux';
 import { configureStore } from '@reduxjs/toolkit';
-import SummaryPanel from './SummaryPanel';
-import gpxReducer, { setDisplayData } from '../store/gpxSlice';
-import settingsReducer, { setTargetPaceSeconds } from '../store/settingsSlice';
-import resultsReducer, { setResults } from '../store/resultsSlice';
-import segmentsReducer from '../store/segmentsSlice';
+import SummaryPanel from '../../src/components/SummaryPanel';
+import gpxReducer, { setDisplayData } from '../../src/store/gpxSlice';
+import settingsReducer, { setTargetPaceSeconds } from '../../src/store/settingsSlice';
+import resultsReducer, { setResults } from '../../src/store/resultsSlice';
+import segmentsReducer from '../../src/store/segmentsSlice';
 
 // Test store without redux-persist
 function createTestStore(preloadedState?: Parameters<typeof configureStore>[0]['preloadedState']) {

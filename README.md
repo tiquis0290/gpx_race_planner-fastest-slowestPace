@@ -1,6 +1,5 @@
 # GPX Race Planner
 
-[![Tests](https://github.com/martinkobelka/gpx_race_planner/actions/workflows/deploy.yml/badge.svg?label=tests)](https://github.com/martinkobelka/gpx_race_planner/actions/workflows/deploy.yml)
 [![Deploy](https://github.com/martinkobelka/gpx_race_planner/actions/workflows/deploy.yml/badge.svg)](https://github.com/martinkobelka/gpx_race_planner/actions/workflows/deploy.yml)
 
 A browser-based tool for planning race pacing strategies from a GPX file or manually defined segments.

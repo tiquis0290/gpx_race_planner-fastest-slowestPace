@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { formatPace, formatTime, formatTimeMinSec, parsePace, parseTimeHMS } from './formatters';
+import { formatPace, formatTime, formatTimeMinSec, parsePace, parseTimeHMS } from '../../src/services/formatters';
 
 describe('formatPace', () => {
   it('formats whole minutes correctly', () => {

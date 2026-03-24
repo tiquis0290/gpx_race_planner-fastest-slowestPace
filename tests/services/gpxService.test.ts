@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
-import { smoothElevations, computeElevationStats } from './gpxService';
-import type { GpxPoint } from '../types/index';
+import { smoothElevations, computeElevationStats } from '../../src/services/gpxService';
+import type { GpxPoint } from '../../src/types/index';
 
 const pt = (elevation: number, distance: number): GpxPoint => ({ lat: 0, lon: 0, elevation, distance });
 

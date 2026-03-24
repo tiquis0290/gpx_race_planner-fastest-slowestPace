@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
-import { generateGarminJson } from './garminJsonService';
-import type { GarminWorkoutStep } from './garminJsonService';
+import { generateGarminJson } from '../../src/services/garminJsonService';
+import type { GarminWorkoutStep } from '../../src/services/garminJsonService';
 
 const step = (distanceMeters: number, targetPaceSec: number, label: string): GarminWorkoutStep => ({
   distanceMeters,

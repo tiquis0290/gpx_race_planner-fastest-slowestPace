@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
-import { computeEffortFactor, buildSegments, computeResults } from './segmentationService';
-import type { Segment } from '../types/index';
+import { computeEffortFactor, buildSegments, computeResults } from '../../src/services/segmentationService';
+import type { Segment } from '../../src/types/index';
 
 describe('computeEffortFactor – linear model', () => {
   const pace = 300; // 5:00 /km
