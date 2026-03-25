@@ -4,16 +4,25 @@ import type { RootState, AppDispatch } from '../store';
 import { setResults } from '../store/resultsSlice';
 import { computeResults } from '../services/segmentationService';
 import type { SegmentResult } from '../types';
+import { useDebounce } from '../hooks/useDebounce';
 
 const ResultsCalculator: React.FC = () => {
   const dispatch = useDispatch<AppDispatch>();
-  const segments = useSelector((s: RootState) => s.segments.segments);
+  const segments      = useSelector((s: RootState) => s.segments.segments);
   const totalDistance = useSelector((s: RootState) => s.gpx.totalDistance);
   const { targetPaceSeconds, effortModel, uphillCost, downhillBenefit, powerExponent, splitStrategy, splitStrength } =
     useSelector((s: RootState) => s.settings);
 
+  const dPace     = useDebounce(targetPaceSeconds, 1000);
+  const dModel    = useDebounce(effortModel,       1000);
+  const dUphill   = useDebounce(uphillCost,        1000);
+  const dDownhill = useDebounce(downhillBenefit,   1000);
+  const dExponent = useDebounce(powerExponent,     1000);
+  const dStrategy = useDebounce(splitStrategy,     1000);
+  const dStrength = useDebounce(splitStrength,     1000);
+
   useEffect(() => {
-    if (segments.length === 0 || totalDistance === 0 || targetPaceSeconds === 0) {
+    if (segments.length === 0 || totalDistance === 0 || dPace === 0) {
       dispatch(setResults({ basePace: 0, segmentResults: [] }));
       return;
     }
@@ -21,13 +30,13 @@ const ResultsCalculator: React.FC = () => {
     const { basePace, effortFactors, splitFactors } = computeResults(
       segments,
       totalDistance,
-      targetPaceSeconds,
-      uphillCost,
-      downhillBenefit,
-      splitStrategy,
-      splitStrength,
-      effortModel,
-      powerExponent,
+      dPace,
+      dUphill,
+      dDownhill,
+      dStrategy,
+      dStrength,
+      dModel,
+      dExponent,
     );
 
     let cumulativeTime = 0;
@@ -46,7 +55,7 @@ const ResultsCalculator: React.FC = () => {
     });
 
     dispatch(setResults({ basePace, segmentResults }));
-  }, [segments, totalDistance, targetPaceSeconds, effortModel, uphillCost, downhillBenefit, powerExponent, splitStrategy, splitStrength, dispatch]);
+  }, [segments, totalDistance, dPace, dModel, dUphill, dDownhill, dExponent, dStrategy, dStrength, dispatch]);
 
   return null;
 };

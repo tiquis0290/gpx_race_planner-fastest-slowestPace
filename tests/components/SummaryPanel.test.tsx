@@ -40,12 +40,12 @@ describe('SummaryPanel – empty state', () => {
     expect(screen.getByText('Tempo na rovině')).toBeInTheDocument();
   });
 
-  it('shows — for all 6 values when targetPaceSeconds is 0', () => {
+  it('shows — for all 8 values when targetPaceSeconds is 0', () => {
     // Set targetPaceSeconds=0 so the pace card also shows '—'
     const store = createTestStore({ settings: { targetPaceSeconds: 0 } as never });
     renderWithStore(store);
     const dashes = screen.getAllByText('—');
-    expect(dashes.length).toBe(6);
+    expect(dashes.length).toBe(8);
   });
 });
 

@@ -16,6 +16,8 @@ interface SettingsState {
   powerExponent: number;
   splitStrategy: 'negative' | 'even' | 'positive';
   splitStrength: number;
+  visibleColumns: string[];
+  visibleStats: string[];
 }
 
 const initialState: SettingsState = {
@@ -30,6 +32,8 @@ const initialState: SettingsState = {
   powerExponent: 1.5,
   splitStrategy: 'even',
   splitStrength: 0.05,
+  visibleColumns: ['fromTo', 'lengthKm', 'elev', 'avgSlope', 'type', 'pace', 'segTime', 'cumTime', 'avgPace'],
+  visibleStats: ['distance', 'ascent', 'descent', 'time', 'pace', 'basePace', 'fastest', 'slowest'],
 };
 
 const settingsSlice = createSlice({
@@ -69,6 +73,12 @@ const settingsSlice = createSlice({
     setSplitStrength(state, action: PayloadAction<number>) {
       state.splitStrength = action.payload;
     },
+    setVisibleColumns(state, action: PayloadAction<string[]>) {
+      state.visibleColumns = action.payload;
+    },
+    setVisibleStats(state, action: PayloadAction<string[]>) {
+      state.visibleStats = action.payload;
+    },
     resetSettings() {
       return initialState;
     },
@@ -88,5 +98,7 @@ export const {
   setPowerExponent,
   setSplitStrategy,
   setSplitStrength,
+  setVisibleColumns,
+  setVisibleStats,
 } = settingsSlice.actions;
 export default settingsSlice.reducer;

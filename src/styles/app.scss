@@ -131,6 +131,35 @@ body {
   padding: 1rem;
 }
 
+// ─── Results overlay ───────────────────────────────────────────────────────
+
+.results-col {
+  position: relative;
+}
+
+.results-col--calculating > *:not(.results-overlay) {
+  opacity: 0.4;
+  pointer-events: none;
+  user-select: none;
+  transition: opacity 0.2s;
+}
+
+.results-overlay {
+  position: absolute;
+  inset: 0;
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
+
+  &__icon {
+    font-size: 2rem;
+    color: $color-primary;
+    filter: drop-shadow(0 0 6px rgba(255,255,255,0.8));
+  }
+}
+
 // ─── Footer ────────────────────────────────────────────────────────────────
 
 .app-footer {
@@ -166,7 +195,7 @@ body {
   gap: 0.5rem;
   margin-right: 1rem;
 
-  &__icon { font-size: 1.3rem; color: $color-primary; }
+  &__icon { height: 2rem; width: auto; display: block; }
   &__name { font-size: 1.1rem; font-weight: 700; color: $color-text; }
 }
 
@@ -242,6 +271,22 @@ body {
   &__label { flex: 1; }
 }
 
+.gpx-loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.6rem;
+  padding: 2rem 1rem;
+  color: $color-text-muted;
+
+  &__icon { font-size: 1.2rem; }
+}
+
+.sample-routes-dropdown {
+  width: 100%;
+  margin-bottom: 0.75rem;
+}
+
 .drop-zone {
   border: 2px dashed $color-border;
   border-radius: 8px;
@@ -315,11 +360,51 @@ body {
 
 // ─── SummaryPanel ──────────────────────────────────────────────────────────
 
-.summary-stat { padding: 0.4rem; }
+.summary-panel {
+  &__controls {
+    display: flex;
+    justify-content: flex-end;
+    margin-bottom: 0.4rem;
+  }
+
+  .grid {
+    align-items: stretch;
+  }
+}
+
+.summary-stat {
+  padding: 0.4rem;
+  display: flex;
+  flex-direction: column;
+
+  .p-card {
+    flex: 1;
+    height: 100%;
+  }
+}
 
 .summary-card {
   text-align: center;
   padding: 0.25rem;
+  height: 100%;
+  position: relative;
+
+  &__close.p-button {
+    position: absolute;
+    top: 0.15rem;
+    right: 0.15rem;
+    width: 1.25rem;
+    height: 1.25rem;
+    padding: 0;
+    font-size: 0.6rem;
+    color: $color-text-faint;
+    opacity: 0;
+    transition: opacity 0.15s;
+  }
+
+  &:hover &__close.p-button { opacity: 1; }
+
+  &--highlighted { box-shadow: 0 0 0 2px $color-primary-ring, 0 2px 8px rgba(59,130,246,0.15) !important; }
 
   &__icon  { font-size: 1.3rem; color: var(--icon-color); }
   &__value { font-size: 1rem; font-weight: 700; margin-top: 0.2rem; }
@@ -349,29 +434,59 @@ body {
 }
 
 .manual-form-row {
-  display: flex;
-  gap: 0.5rem;
-  align-items: flex-end;
+  display: grid;
+  grid-template-columns: 1fr 1fr auto;
+  grid-template-rows: auto auto;
+  column-gap: 0.5rem;
+  row-gap: 0.25rem;
+  align-items: center;
 }
 
-.manual-form-field {
-  flex: 2 1 0;
-  min-width: 0;
+.manual-elev-label {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.manual-type-badge {
+  display: flex;
+  justify-content: center;
+}
+
+.manual-unit-pills {
+  display: flex;
+  border: 1px solid #cbd5e1;
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.manual-unit-pill {
+  padding: 0 6px;
+  font-size: 0.7rem;
+  font-weight: 600;
+  line-height: 1.6rem;
+  border: none;
+  background: transparent;
+  color: $color-text-muted;
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s;
+
+  & + & { border-left: 1px solid #cbd5e1; }
+
+  &--active {
+    background: $color-primary;
+    color: #fff;
+  }
+
+  &:not(&--active):hover {
+    background: #f1f5f9;
+  }
 }
 
 .manual-form-actions {
   display: flex;
   gap: 0.25rem;
-}
-
-.type-indicator {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  font-size: 0.8rem;
-  color: $color-text-muted;
-
-  &__detail { color: $color-text-faint; }
+  justify-content: center;
 }
 
 .manual-totals {
@@ -413,6 +528,45 @@ body {
 .elev-unit  { color: $color-text-faint; font-size: 0.8rem; }
 .slope-value { font-weight: 600; }
 
+.collapsible-card-title {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  width: 100%;
+}
+
+.collapsible-card-btn.p-button {
+  width: 1.25rem;
+  height: 1.25rem;
+  padding: 0;
+  font-size: 0.7rem;
+  flex-shrink: 0;
+}
+
+.seg-table-card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 0.75rem;
+}
+
+.seg-table-card-controls {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  min-width: 0;
+}
+
+.seg-table-title {
+  font-size: 1rem;
+  font-weight: 600;
+  color: #374151;
+}
+
+.col-selector {
+  width: auto !important;
+}
+
 // ─── RouteMap ──────────────────────────────────────────────────────────────
 
 .route-map-card .p-card-content {
@@ -434,9 +588,66 @@ body {
   padding: 2rem;
 }
 
+.elevation-chart-wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.elevation-chart-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.elevation-legend {
+  display: flex;
+  gap: 12px;
+  font-size: 0.8rem;
+  color: #475569;
+}
+
+.elevation-legend-item {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.elevation-legend-swatch {
+  display: inline-block;
+  width: 12px;
+  height: 10px;
+  border-radius: 2px;
+  opacity: 0.7;
+}
+
+.elevation-zoom-controls {
+  display: flex;
+  gap: 2px;
+}
+
+.elevation-chart-body {
+  display: flex;
+  align-items: stretch;
+}
+
+.elevation-y-axis-svg {
+  flex-shrink: 0;
+  display: block;
+}
+
+.elevation-scroll-container {
+  overflow-x: auto;
+  overflow-y: hidden;
+  padding-bottom: 4px; // prevents scrollbar from clipping SVG bottom
+
+  &::-webkit-scrollbar       { height: 6px; }
+  &::-webkit-scrollbar-track { background: #f1f5f9; border-radius: 3px; }
+  &::-webkit-scrollbar-thumb { background: #94a3b8; border-radius: 3px; }
+  &::-webkit-scrollbar-thumb:hover { background: #64748b; }
+}
+
 .elevation-svg {
-  width: 100%;
-  height: auto;
   display: block;
 }
 
@@ -446,6 +657,17 @@ body {
 }
 
 .seg-overlay { pointer-events: none; }
+
+.elevation-seg-data {
+  padding-top: 0.2rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.7rem;
+  font-size: 0.8rem;
+  color: #475569;
+  min-height: 1.4rem;
+}
 
 // ─── HelpDialog ────────────────────────────────────────────────────────────
 

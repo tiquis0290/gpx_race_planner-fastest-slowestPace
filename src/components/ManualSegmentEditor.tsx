@@ -3,7 +3,6 @@ import { useDispatch, useSelector } from 'react-redux';
 import { Card } from 'primereact/card';
 import { Button } from 'primereact/button';
 import { InputNumber } from 'primereact/inputnumber';
-import { SelectButton } from 'primereact/selectbutton';
 import { DataTable } from 'primereact/datatable';
 import { Column } from 'primereact/column';
 import { Tag } from 'primereact/tag';
@@ -31,6 +30,7 @@ const ManualSegmentEditor: React.FC = () => {
   const manualInputs = useSelector((s: RootState) => s.segments.manualInputs ?? EMPTY_INPUTS);
   const slopeThreshold = useSelector((s: RootState) => s.segments.slopeThreshold);
 
+  const [collapsed, setCollapsed] = useState(false);
   const [formLength, setFormLength] = useState<number>(1);
   const [formElevM, setFormElevM] = useState<number>(0);
   const [elevUnit, setElevUnit] = useState<'m' | '%'>('m');
@@ -39,11 +39,6 @@ const ManualSegmentEditor: React.FC = () => {
   const formElevPct = mToPct(formElevM, formLength);
   const detectedType = autoType(formElevM, formLength, slopeThreshold);
   const editingIndex = editingUid ? manualInputs.findIndex((i) => i.uid === editingUid) : -1;
-
-  const unitOptions = [
-    { label: 'm', value: 'm' },
-    { label: '%', value: '%' },
-  ];
 
   const resetForm = () => {
     setFormLength(1);
@@ -79,9 +74,23 @@ const ManualSegmentEditor: React.FC = () => {
   const totalLoss = manualInputs.reduce((s, i) => s + Math.max(0, -i.elevationChangeM), 0);
 
   const typeLabels = { uphill: t.typeUphill, downhill: t.typeDownhill, flat: t.typeFlat };
+  const tableRows = manualInputs.map(r => ({ ...r, typeLabel: typeLabels[r.type] }));
+
+  const cardTitle = (
+    <div className="collapsible-card-title">
+      <Button
+        icon={`pi pi-chevron-${collapsed ? 'down' : 'up'}`}
+        text rounded
+        className="collapsible-card-btn"
+        onClick={(e) => { e.stopPropagation(); setCollapsed(c => !c); }}
+      />
+      <span>{t.manualEditorCard}</span>
+    </div>
+  );
 
   return (
-    <Card title={t.manualEditorCard} className="mb-3">
+    <Card title={cardTitle} className="mb-3">
+      {collapsed ? null : <>
       {editingUid && (
         <div className="edit-banner">
           <i className="pi pi-pencil" />
@@ -91,40 +100,49 @@ const ManualSegmentEditor: React.FC = () => {
 
       <div className="manual-form">
         <div className="manual-form-row">
-          <div className="manual-form-field">
-            <label className="block mb-1 text-sm font-medium">{t.manualLength}</label>
+          {/* Řádek 1: labely */}
+          <label className="text-sm font-medium">{t.manualLength}</label>
+          <div className="manual-elev-label">
+            <span className="text-sm font-medium">{t.manualElevChange}</span>
+            <div className="manual-unit-pills">
+              <button
+                className={`manual-unit-pill${elevUnit === 'm' ? ' manual-unit-pill--active' : ''}`}
+                onClick={() => setElevUnit('m')}
+                title={t.manualUnitM}
+              >m</button>
+              <button
+                className={`manual-unit-pill${elevUnit === '%' ? ' manual-unit-pill--active' : ''}`}
+                onClick={() => setElevUnit('%')}
+                title={t.manualUnitPct}
+              >%</button>
+            </div>
+          </div>
+          <div className="manual-type-badge">
+            <Tag value={typeLabels[detectedType]} severity={TYPE_SEVERITY[detectedType]} />
+          </div>
+
+          {/* Řádek 2: inputy + akce */}
+          <InputNumber
+            value={formLength}
+            onValueChange={(e) => setFormLength(e.value ?? 1)}
+            min={0.01} step={0.1} minFractionDigits={2} maxFractionDigits={2}
+            suffix=" km" showButtons onKeyDown={handleKeyDown}
+          />
+          {elevUnit === 'm' ? (
             <InputNumber
-              value={formLength}
-              onValueChange={(e) => setFormLength(e.value ?? 1)}
-              min={0.01} step={0.1} minFractionDigits={2} maxFractionDigits={2}
-              suffix=" km" showButtons onKeyDown={handleKeyDown}
+              value={formElevM}
+              onValueChange={(e) => setFormElevM(e.value ?? 0)}
+              step={1} suffix=" m" showButtons onKeyDown={handleKeyDown}
+              minFractionDigits={0} maxFractionDigits={0}
             />
-          </div>
-          <div className="manual-form-field">
-            <label className="block mb-1 text-sm font-medium">{t.manualElevChange}</label>
-            {elevUnit === 'm' ? (
-              <InputNumber
-                value={formElevM}
-                onValueChange={(e) => setFormElevM(e.value ?? 0)}
-                step={1} suffix=" m" showButtons onKeyDown={handleKeyDown}
-                minFractionDigits={0} maxFractionDigits={0}
-              />
-            ) : (
-              <InputNumber
-                value={parseFloat(formElevPct.toFixed(2))}
-                onValueChange={(e) => setFormElevM(pctToM(e.value ?? 0, formLength))}
-                step={0.5} suffix=" %" showButtons onKeyDown={handleKeyDown}
-                minFractionDigits={1} maxFractionDigits={2}
-              />
-            )}
-          </div>
-          <div>
-            <SelectButton
-              value={elevUnit}
-              options={unitOptions}
-              onChange={(e) => e.value && setElevUnit(e.value)}
+          ) : (
+            <InputNumber
+              value={parseFloat(formElevPct.toFixed(2))}
+              onValueChange={(e) => setFormElevM(pctToM(e.value ?? 0, formLength))}
+              step={0.1} suffix=" %" showButtons onKeyDown={handleKeyDown}
+              minFractionDigits={1} maxFractionDigits={2}
             />
-          </div>
+          )}
           <div className="manual-form-actions">
             {editingUid ? (
               <>
@@ -136,20 +154,12 @@ const ManualSegmentEditor: React.FC = () => {
             )}
           </div>
         </div>
-
-        <div className="type-indicator">
-          <span>{t.manualType}:</span>
-          <Tag value={typeLabels[detectedType]} severity={TYPE_SEVERITY[detectedType]} />
-          <span className="type-indicator__detail">
-            ({formElevPct >= 0 ? '+' : ''}{formElevPct.toFixed(1)} %, {formElevM >= 0 ? '+' : ''}{Math.round(formElevM)} m)
-          </span>
-        </div>
       </div>
 
       {manualInputs.length > 0 ? (
         <>
           <DataTable
-            value={manualInputs}
+            value={tableRows}
             size="small"
             scrollable
             scrollHeight="280px"
@@ -174,8 +184,8 @@ const ManualSegmentEditor: React.FC = () => {
             />
             <Column
               header={t.colType}
-              body={(r: ManualSegmentInput) => (
-                <Tag value={typeLabels[r.type]} severity={TYPE_SEVERITY[r.type]} />
+              body={(r: ManualSegmentInput & { typeLabel: string }) => (
+                <Tag value={r.typeLabel} severity={TYPE_SEVERITY[r.type]} />
               )}
             />
             <Column
@@ -207,6 +217,7 @@ const ManualSegmentEditor: React.FC = () => {
       ) : (
         <div className="manual-empty">{t.manualEmpty}</div>
       )}
+      </>}
     </Card>
   );
 };

@@ -2,15 +2,17 @@ import React, { useCallback, useRef, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { Card } from 'primereact/card';
 import { Button } from 'primereact/button';
+import { Dropdown } from 'primereact/dropdown';
 import { InputNumber } from 'primereact/inputnumber';
 import { parseGpx, smoothElevations, computeElevationStats } from '../services/gpxService';
 import { buildSegments } from '../services/segmentationService';
 import { setGpxData, resetGpx } from '../store/gpxSlice';
 import { setSegments, resetSegments, setSmoothingWindow, setSlopeThreshold, setMinSegmentLength } from '../store/segmentsSlice';
-import { resetResults } from '../store/resultsSlice';
+import { resetResults, setIsCalculating } from '../store/resultsSlice';
 import type { RootState, AppDispatch } from '../store';
 import HelpIcon from './HelpIcon';
 import { useT } from '../i18n/useT';
+import samples from '../samples.json';
 
 const GpxUploader: React.FC = () => {
   const dispatch = useDispatch<AppDispatch>();
@@ -19,6 +21,20 @@ const GpxUploader: React.FC = () => {
   const { slopeThreshold, minSegmentLength, smoothingWindow } = useSelector((s: RootState) => s.segments);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [dragging, setDragging] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [collapsed, setCollapsed] = useState(false);
+
+  const processGpxText = useCallback(
+    (text: string, name: string) => {
+      const raw = parseGpx(text);
+      const smoothed = smoothElevations(raw, smoothingWindow);
+      const { totalElevationGain, totalElevationLoss } = computeElevationStats(smoothed);
+      const totalDistance = smoothed.length > 0 ? smoothed[smoothed.length - 1].distance : 0;
+      dispatch(setGpxData({ fileName: name, rawPoints: raw, smoothedPoints: smoothed, totalDistance, totalElevationGain, totalElevationLoss }));
+      dispatch(setSegments(buildSegments(smoothed, slopeThreshold, minSegmentLength)));
+    },
+    [dispatch, smoothingWindow, slopeThreshold, minSegmentLength]
+  );
 
   const processFile = useCallback(
     (file: File) => {
@@ -26,23 +42,37 @@ const GpxUploader: React.FC = () => {
         alert('Prosím nahrajte soubor ve formátu .gpx');
         return;
       }
+      setLoading(true);
       const reader = new FileReader();
       reader.onload = (e) => {
         try {
-          const text = e.target?.result as string;
-          const raw = parseGpx(text);
-          const smoothed = smoothElevations(raw, smoothingWindow);
-          const { totalElevationGain, totalElevationLoss } = computeElevationStats(smoothed);
-          const totalDistance = smoothed.length > 0 ? smoothed[smoothed.length - 1].distance : 0;
-          dispatch(setGpxData({ fileName: file.name, rawPoints: raw, smoothedPoints: smoothed, totalDistance, totalElevationGain, totalElevationLoss }));
-          dispatch(setSegments(buildSegments(smoothed, slopeThreshold, minSegmentLength)));
+          processGpxText(e.target?.result as string, file.name);
         } catch (err) {
           alert('Chyba při čtení GPX souboru: ' + (err as Error).message);
+        } finally {
+          setLoading(false);
         }
       };
+      reader.onerror = () => setLoading(false);
       reader.readAsText(file);
     },
-    [dispatch, smoothingWindow, slopeThreshold, minSegmentLength]
+    [processGpxText]
+  );
+
+  const loadSample = useCallback(
+    async (sample: { file: string; nameKey: string }, label: string) => {
+      setLoading(true);
+      try {
+        const res = await fetch(`${import.meta.env.BASE_URL}samples/${sample.file}`);
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        processGpxText(await res.text(), label);
+      } catch (err) {
+        alert('Chyba při načítání vzorové trasy: ' + (err as Error).message);
+      } finally {
+        setLoading(false);
+      }
+    },
+    [processGpxText]
   );
 
   const handleFileInput = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -56,8 +86,21 @@ const GpxUploader: React.FC = () => {
   const handleDrop      = (e: React.DragEvent) => { e.preventDefault(); setDragging(false); const file = e.dataTransfer.files?.[0]; if (file) processFile(file); };
   const handleReset     = () => { dispatch(resetGpx()); dispatch(resetSegments()); dispatch(resetResults()); };
 
+  const cardTitle = (
+    <div className="collapsible-card-title">
+      <Button
+        icon={`pi pi-chevron-${collapsed ? 'down' : 'up'}`}
+        text rounded
+        className="collapsible-card-btn"
+        onClick={(e) => { e.stopPropagation(); setCollapsed(c => !c); }}
+      />
+      <span>{t.gpxCard}</span>
+    </div>
+  );
+
   return (
-    <Card title={t.gpxCard} className="mb-3">
+    <Card title={cardTitle} className="mb-3">
+      {collapsed ? null : <>
       {fileName ? (
         <div>
           <div className="flex align-items-center gap-2 mb-3">
@@ -71,27 +114,43 @@ const GpxUploader: React.FC = () => {
                 {t.smoothing}
                 <HelpIcon id="help-smoothing" text={t.helpSmoothing} />
               </label>
-              <InputNumber value={smoothingWindow} onValueChange={(e) => dispatch(setSmoothingWindow(e.value ?? 7))} min={1} max={50} showButtons />
+              <InputNumber value={smoothingWindow} onValueChange={(e) => { dispatch(setIsCalculating(true)); dispatch(setSmoothingWindow(e.value ?? 7)); }} min={1} max={50} showButtons />
             </div>
             <div className="gpx-param">
               <label className="block mb-1 text-sm font-medium gpx-param__label">
                 {t.slopeThreshold}
                 <HelpIcon id="help-slope" text={t.helpSlope} />
               </label>
-              <InputNumber value={slopeThreshold} onValueChange={(e) => dispatch(setSlopeThreshold(e.value ?? 5))} min={1} max={50} step={1} minFractionDigits={0} maxFractionDigits={0} suffix=" m/km" showButtons />
+              <InputNumber value={slopeThreshold} onValueChange={(e) => { dispatch(setIsCalculating(true)); dispatch(setSlopeThreshold(e.value ?? 5)); }} min={1} max={50} step={1} minFractionDigits={0} maxFractionDigits={0} suffix=" m/km" showButtons />
             </div>
             <div className="gpx-param">
               <label className="block mb-1 text-sm font-medium gpx-param__label">
                 {t.minLength}
                 <HelpIcon id="help-minlen" text={t.helpMinLen} />
               </label>
-              <InputNumber value={minSegmentLength} onValueChange={(e) => dispatch(setMinSegmentLength(e.value ?? 100))} min={50} max={2000} step={50} showButtons />
+              <InputNumber value={minSegmentLength} onValueChange={(e) => { dispatch(setIsCalculating(true)); dispatch(setMinSegmentLength(e.value ?? 100)); }} min={50} max={2000} step={50} showButtons />
             </div>
           </div>
         </div>
       ) : (
         <>
           <input ref={fileInputRef} type="file" accept=".gpx" className="fit-export-hidden" onChange={handleFileInput} />
+          {loading && (
+            <div className="gpx-loading">
+              <i className="pi pi-spin pi-spinner gpx-loading__icon" />
+              <span>{t.gpxLoading}</span>
+            </div>
+          )}
+          {!loading && (<>
+          <Dropdown
+            options={samples.map((s) => ({ label: t[s.nameKey as keyof typeof t] as string, value: s.file }))}
+            onChange={(e) => {
+              const s = samples.find(x => x.file === e.value);
+              if (s) loadSample(s, t[s.nameKey as keyof typeof t] as string);
+            }}
+            placeholder={t.sampleRoutes}
+            className="sample-routes-dropdown"
+          />
           <div
             className={`drop-zone${dragging ? ' drop-zone--dragging' : ''}`}
             onDragOver={handleDragOver}
@@ -105,8 +164,10 @@ const GpxUploader: React.FC = () => {
             </div>
             <div className="drop-zone__hint">{t.dropZoneHint}</div>
           </div>
+          </>)}
         </>
       )}
+    </>}
     </Card>
   );
 };

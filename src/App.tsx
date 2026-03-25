@@ -1,7 +1,8 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { Menubar } from 'primereact/menubar';
 import { Card } from 'primereact/card';
+import { Button } from 'primereact/button';
 import { SelectButton } from 'primereact/selectbutton';
 import { ConfirmDialog, confirmDialog } from 'primereact/confirmdialog';
 import type { MenuItem } from 'primereact/menuitem';
@@ -38,12 +39,27 @@ const LANGS: { value: Lang; label: string }[] = [
 const App: React.FC = () => {
   const dispatch = useDispatch<AppDispatch>();
   const t = useT();
-  const smoothedPoints = useSelector((s: RootState) => s.gpx.smoothedPoints);
-  const segments = useSelector((s: RootState) => s.segments.segments);
-  const fileName = useSelector((s: RootState) => s.gpx.fileName);
-  const language = useSelector((s: RootState) => s.settings.language);
-  const appMode = useSelector((s: RootState) => s.settings.appMode);
-  const [helpVisible, setHelpVisible] = React.useState(false);
+  const smoothedPoints  = useSelector((s: RootState) => s.gpx.smoothedPoints);
+  const segments        = useSelector((s: RootState) => s.segments.segments);
+  const fileName        = useSelector((s: RootState) => s.gpx.fileName);
+  const language        = useSelector((s: RootState) => s.settings.language);
+  const appMode         = useSelector((s: RootState) => s.settings.appMode);
+  const isCalculating   = useSelector((s: RootState) => s.results.isCalculating);
+  const [helpVisible, setHelpVisible] = useState(false);
+  const [mapCollapsed, setMapCollapsed] = useState(false);
+  const [chartCollapsed, setChartCollapsed] = useState(false);
+
+  const collapseTitle = (title: string, collapsed: boolean, toggle: () => void) => (
+    <div className="collapsible-card-title">
+      <Button
+        icon={`pi pi-chevron-${collapsed ? 'down' : 'up'}`}
+        text rounded
+        className="collapsible-card-btn"
+        onClick={(e) => { e.stopPropagation(); toggle(); }}
+      />
+      <span>{title}</span>
+    </div>
+  );
 
   const handleFullReset = () => {
     confirmDialog({
@@ -87,7 +103,7 @@ const App: React.FC = () => {
 
   const menubarStart = (
     <div className="menubar-brand">
-      <i className="pi pi-map menubar-brand__icon" />
+      <img src={`${import.meta.env.BASE_URL}logo.png`} alt="logo" className="menubar-brand__icon" />
       <span className="menubar-brand__name">{t.appName}</span>
     </div>
   );
@@ -143,15 +159,20 @@ const App: React.FC = () => {
             <EffortSettings />
           </div>
 
-          <div className="col-12 lg:col-8">
+          <div className={`col-12 lg:col-8 results-col${isCalculating ? ' results-col--calculating' : ''}`}>
+            {isCalculating && (
+              <div className="results-overlay">
+                <i className="pi pi-spin pi-spinner results-overlay__icon" />
+              </div>
+            )}
             {appMode === 'gpx' && fileName && smoothedPoints.length > 0 && segments.length > 0 && (
-              <Card title={t.mapCard} className="mb-3 route-map-card">
-                <RouteMap points={smoothedPoints} segments={segments} />
+              <Card title={collapseTitle(t.mapCard, mapCollapsed, () => setMapCollapsed(c => !c))} className="mb-3 route-map-card">
+                {!mapCollapsed && <RouteMap points={smoothedPoints} segments={segments} />}
               </Card>
             )}
 
-            <Card title={t.chartCard} className="mb-3">
-              {smoothedPoints.length > 0 ? (
+            <Card title={collapseTitle(t.chartCard, chartCollapsed, () => setChartCollapsed(c => !c))} className="mb-3">
+              {!chartCollapsed && (smoothedPoints.length > 0 ? (
                 <ElevationChart points={smoothedPoints} segments={segments} />
               ) : (
                 <div className="chart-empty">
@@ -163,14 +184,10 @@ const App: React.FC = () => {
                     {appMode === 'gpx' ? t.emptyDesc : t.manualEmptyChartHint}
                   </p>
                 </div>
-              )}
+              ))}
             </Card>
 
-            {segments.length > 0 && (
-              <Card title={t.segCardTitle(segments.length)}>
-                <SegmentsTable />
-              </Card>
-            )}
+            {segments.length > 0 && <SegmentsTable />}
           </div>
         </div>
       </div>
