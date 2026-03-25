@@ -1,0 +1,68 @@
+// Global PrimeReact component overrides.
+// Only touch properties that need to differ from the default PrimeReact theme.
+
+.p-card {
+  .p-card-title   { font-size: 1rem; font-weight: 600; color: #374151; }
+  .p-card-body    { padding: 1rem; }
+  .p-card-content { padding: 0; }
+}
+
+.p-toolbar {
+  background: $color-white;
+  border-bottom: 1px solid $color-border;
+  padding: 0.75rem 1.5rem;
+}
+
+.p-selectbutton {
+  display: flex !important;
+  flex-wrap: nowrap;
+  width: 100%;
+
+  .p-button {
+    flex: 1 1 0;
+    justify-content: center;
+    white-space: nowrap;
+  }
+}
+
+.p-inputnumber {
+  display: flex;
+  width: 100%;
+
+  .p-inputnumber-input {
+    flex: 1 1 auto;
+    min-width: 0;
+    width: 1px; // forces flex shrink
+  }
+}
+
+.p-inputtext { width: 100%; }
+.p-dropdown  { width: 100%; }
+.p-slider    { width: 100%; }
+
+.p-datatable {
+  .p-datatable-thead > tr > th {
+    background: $color-surface;
+    color: $color-text-secondary;
+    font-weight: 600;
+    font-size: 0.8125rem;
+    padding: 0.5rem 0.75rem;
+  }
+
+  .p-datatable-tbody > tr > td {
+    padding: 0.4rem 0.75rem;
+    font-size: 0.875rem;
+  }
+
+  .p-datatable-tbody > tr.segment-row-hovered > td {
+    background: #dbeafe !important;
+  }
+
+  .p-datatable-tbody > tr.segment-row-editing > td {
+    background: $color-primary-light !important;
+  }
+}
+
+.p-datatable-striped .p-datatable-tbody > tr:nth-child(even) {
+  background: $color-bg;
+}

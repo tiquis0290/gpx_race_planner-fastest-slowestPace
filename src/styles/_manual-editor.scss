@@ -1,0 +1,116 @@
+// Banner shown while editing an existing segment
+.edit-banner {
+  background: $color-primary-light;
+  border: 1px solid $color-primary-ring;
+  border-radius: 6px;
+  padding: 0.4rem 0.75rem;
+  margin-bottom: 0.6rem;
+  font-size: 0.8rem;
+  color: $color-primary-dark;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.manual-form {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+  margin-bottom: 1rem;
+}
+
+// 3-column grid: Length | Elevation change | Type badge + action button
+// Row 1: labels, Row 2: inputs
+.manual-form-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr auto;
+  grid-template-rows: auto auto;
+  column-gap: 0.5rem;
+  row-gap: 0.25rem;
+  align-items: center;
+}
+
+// Elevation label row: label text + m/% unit pill switcher
+.manual-elev-label {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.manual-type-badge {
+  display: flex;
+  justify-content: center;
+}
+
+// Compact m / % toggle pills inline with the elevation label
+.manual-unit-pills {
+  display: flex;
+  border: 1px solid #cbd5e1;
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.manual-unit-pill {
+  padding: 0 6px;
+  font-size: 0.7rem;
+  font-weight: 600;
+  line-height: 1.6rem;
+  border: none;
+  background: transparent;
+  color: $color-text-muted;
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s;
+
+  & + & { border-left: 1px solid #cbd5e1; }
+
+  &--active {
+    background: $color-primary;
+    color: #fff;
+  }
+
+  &:not(&--active):hover {
+    background: #f1f5f9;
+  }
+}
+
+.manual-form-actions {
+  display: flex;
+  gap: 0.25rem;
+  justify-content: center;
+}
+
+// Totals row below the segments list
+.manual-totals {
+  display: flex;
+  gap: 1rem;
+  font-size: 0.8rem;
+  color: $color-text-muted;
+  border-top: 1px solid $color-border;
+  padding-top: 0.5rem;
+
+  &__gain  { color: $color-uphill; }
+  &__loss  { color: $color-downhill; }
+  &__clear { margin-left: auto; padding: 0; }
+}
+
+.manual-empty {
+  text-align: center;
+  color: $color-text-faint;
+  padding: 1rem 0;
+  font-size: 0.875rem;
+}
+
+.manual-row-actions {
+  display: flex;
+  gap: 0.1rem;
+}
+
+// Elevation value display in the table
+.elev-value  { font-weight: 600; }
+
+.elev-detail {
+  font-weight: 400;
+  font-size: 0.8em;
+  margin-left: 0.3em;
+  color: $color-text-faint;
+}

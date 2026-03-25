@@ -1,17 +1,20 @@
 import { useEffect } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
-import type { RootState, AppDispatch } from '../store';
+import { useDispatch } from 'react-redux';
+import type { AppDispatch } from '../store';
 import { setResults } from '../store/resultsSlice';
 import { computeResults } from '../services/segmentationService';
 import type { SegmentResult } from '../types';
 import { useDebounce } from '../hooks/useDebounce';
+import { useSegmentData } from '../hooks/useSegmentData';
+import { useGpxData } from '../hooks/useGpxData';
+import { useAppSettings } from '../hooks/useAppSettings';
 
 const ResultsCalculator: React.FC = () => {
   const dispatch = useDispatch<AppDispatch>();
-  const segments      = useSelector((s: RootState) => s.segments.segments);
-  const totalDistance = useSelector((s: RootState) => s.gpx.totalDistance);
+  const { segments }    = useSegmentData();
+  const { totalDistance } = useGpxData();
   const { targetPaceSeconds, effortModel, uphillCost, downhillBenefit, powerExponent, splitStrategy, splitStrength } =
-    useSelector((s: RootState) => s.settings);
+    useAppSettings();
 
   const dPace     = useDebounce(targetPaceSeconds, 1000);
   const dModel    = useDebounce(effortModel,       1000);

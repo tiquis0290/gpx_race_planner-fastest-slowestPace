@@ -1,16 +1,18 @@
 import { useEffect } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
-import type { RootState, AppDispatch } from '../store';
+import { useDispatch } from 'react-redux';
+import type { AppDispatch } from '../store';
 import { setSegments } from '../store/segmentsSlice';
 import { setDisplayData } from '../store/gpxSlice';
 import { buildSegments } from '../services/segmentationService';
 import { smoothElevations, computeElevationStats } from '../services/gpxService';
 import { useDebounce } from '../hooks/useDebounce';
+import { useGpxData } from '../hooks/useGpxData';
+import { useSegmentData } from '../hooks/useSegmentData';
 
 const SegmentationWatcher: React.FC = () => {
   const dispatch = useDispatch<AppDispatch>();
-  const rawPoints = useSelector((s: RootState) => s.gpx.rawPoints);
-  const { slopeThreshold, minSegmentLength, smoothingWindow } = useSelector((s: RootState) => s.segments);
+  const { rawPoints } = useGpxData();
+  const { slopeThreshold, minSegmentLength, smoothingWindow } = useSegmentData();
 
   const dSmoothing  = useDebounce(smoothingWindow,  1000);
   const dSlope      = useDebounce(slopeThreshold,   1000);

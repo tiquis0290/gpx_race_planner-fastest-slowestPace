@@ -122,6 +122,7 @@ const cs = {
   manualSave: 'Uložit',
   manualCancel: 'Zrušit',
   builtAt: 'Sestaveno:',
+  github: 'GitHub',
 } as const;
 
 export default cs;

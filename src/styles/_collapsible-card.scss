@@ -1,0 +1,19 @@
+// Styles for the CollapsibleCard component.
+// The title row holds the chevron button, title text, and optional right-side extra content.
+
+.collapsible-card-title {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  width: 100%;
+
+  &__extra { margin-left: auto; }
+}
+
+.collapsible-card-btn.p-button {
+  width: 1.25rem;
+  height: 1.25rem;
+  padding: 0;
+  font-size: 0.7rem;
+  flex-shrink: 0;
+}

@@ -122,6 +122,7 @@ const en = {
   manualSave: 'Save',
   manualCancel: 'Cancel',
   builtAt: 'Built:',
+  github: 'GitHub',
 } as const;
 
 export default en;

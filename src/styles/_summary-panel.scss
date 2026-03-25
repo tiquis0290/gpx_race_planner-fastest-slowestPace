@@ -1,0 +1,51 @@
+.summary-panel {
+  &__controls {
+    display: flex;
+    justify-content: flex-end;
+    margin-bottom: 0.4rem;
+  }
+
+  .grid {
+    align-items: stretch;
+  }
+}
+
+.summary-stat {
+  padding: 0.4rem;
+  display: flex;
+  flex-direction: column;
+
+  .p-card {
+    flex: 1;
+    height: 100%;
+  }
+}
+
+.summary-card {
+  text-align: center;
+  padding: 0.25rem;
+  height: 100%;
+  position: relative;
+
+  // Close button visible only on hover
+  &__close.p-button {
+    position: absolute;
+    top: 0.15rem;
+    right: 0.15rem;
+    width: 1.25rem;
+    height: 1.25rem;
+    padding: 0;
+    font-size: 0.6rem;
+    color: $color-text-faint;
+    opacity: 0;
+    transition: opacity 0.15s;
+  }
+
+  &:hover &__close.p-button { opacity: 1; }
+
+  &--highlighted { box-shadow: 0 0 0 2px $color-primary-ring, 0 2px 8px rgba(59,130,246,0.15) !important; }
+
+  &__icon  { font-size: 1.3rem; color: var(--icon-color); }
+  &__value { font-size: 1rem; font-weight: 700; margin-top: 0.2rem; }
+  &__label { font-size: 0.72rem; color: $color-text-muted; }
+}

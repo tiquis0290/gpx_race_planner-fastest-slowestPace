@@ -1,38 +1,22 @@
-import React, { useState } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
-import { Card } from 'primereact/card';
-import { Button } from 'primereact/button';
+import React from 'react';
+import { useDispatch } from 'react-redux';
 import { InputNumber } from 'primereact/inputnumber';
 import { Slider } from 'primereact/slider';
 import { SelectButton } from 'primereact/selectbutton';
 import { Dropdown } from 'primereact/dropdown';
-import type { RootState, AppDispatch } from '../store';
+import CollapsibleCard from './CollapsibleCard';
+import type { AppDispatch } from '../store';
 import { setEffortModel, setUphillCost, setDownhillBenefit, setPowerExponent, setSplitStrategy, setSplitStrength } from '../store/settingsSlice';
 import { setIsCalculating } from '../store/resultsSlice';
 import type { EffortModel } from '../store/settingsSlice';
 import HelpIcon from './HelpIcon';
 import { useT } from '../i18n/useT';
+import { useAppSettings } from '../hooks/useAppSettings';
 
 const EffortSettings: React.FC = () => {
   const dispatch = useDispatch<AppDispatch>();
   const t = useT();
-  const { effortModel, uphillCost, downhillBenefit, powerExponent, splitStrategy, splitStrength } = useSelector(
-    (s: RootState) => s.settings
-  );
-  const [collapsed, setCollapsed] = useState(false);
-
-  const cardTitle = (
-    <div className="collapsible-card-title">
-      <Button
-        icon={`pi pi-chevron-${collapsed ? 'down' : 'up'}`}
-        text rounded
-        className="collapsible-card-btn"
-        onClick={(e) => { e.stopPropagation(); setCollapsed(c => !c); }}
-      />
-      <span>{t.effortCard}</span>
-    </div>
-  );
-
+  const { effortModel, uphillCost, downhillBenefit, powerExponent, splitStrategy, splitStrength } = useAppSettings();
   const modelOptions: { label: string; value: EffortModel }[] = [
     { label: t.effortModelMinetti,     value: 'minetti' },
     { label: t.effortModelLinear,      value: 'linear' },
@@ -47,8 +31,7 @@ const EffortSettings: React.FC = () => {
   ];
 
   return (
-    <Card title={cardTitle} className="mb-3">
-      {collapsed ? null : <>
+    <CollapsibleCard title={t.effortCard} className="mb-3">
       <div className="effort-section">
         <label className="block mb-1 text-sm font-medium">
           {t.effortModelLabel}
@@ -109,8 +92,7 @@ const EffortSettings: React.FC = () => {
           <Slider value={Math.round(splitStrength * 100)} onChange={(e) => { dispatch(setIsCalculating(true)); dispatch(setSplitStrength((e.value as number) / 100)); }} min={0} max={20} step={1} />
         </div>
       )}
-    </>}
-    </Card>
+    </CollapsibleCard>
   );
 };
 

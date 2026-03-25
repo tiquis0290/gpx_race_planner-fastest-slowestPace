@@ -1,22 +1,19 @@
 import React, { useState } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
-import { Card } from 'primereact/card';
+import { useDispatch } from 'react-redux';
 import { Button } from 'primereact/button';
+import CollapsibleCard from './CollapsibleCard';
 import { InputNumber } from 'primereact/inputnumber';
 import { DataTable } from 'primereact/datatable';
 import { Column } from 'primereact/column';
 import { Tag } from 'primereact/tag';
-import type { RootState, AppDispatch } from '../store';
+import type { AppDispatch } from '../store';
 import { addManualInput, removeManualInput, updateManualInput, resetManualInputs } from '../store/segmentsSlice';
-import type { ManualSegmentInput, SegmentType } from '../types';
+import { useSegmentData } from '../hooks/useSegmentData';
+import type { ManualSegmentInput } from '../types';
+import { TYPE_SEVERITY } from '../types';
 import { useT } from '../i18n/useT';
 import { autoType } from '../services/manualSegmentService';
 
-const TYPE_SEVERITY: Record<SegmentType, 'danger' | 'success' | 'secondary'> = {
-  uphill: 'danger',
-  downhill: 'success',
-  flat: 'secondary',
-};
 
 const uid = () => Math.random().toString(36).slice(2);
 const EMPTY_INPUTS: ManualSegmentInput[] = [];
@@ -27,10 +24,9 @@ const mToPct = (m: number, lengthKm: number) => lengthKm > 0 ? (m / (lengthKm * 
 const ManualSegmentEditor: React.FC = () => {
   const dispatch = useDispatch<AppDispatch>();
   const t = useT();
-  const manualInputs = useSelector((s: RootState) => s.segments.manualInputs ?? EMPTY_INPUTS);
-  const slopeThreshold = useSelector((s: RootState) => s.segments.slopeThreshold);
+  const { manualInputs: rawManualInputs, slopeThreshold } = useSegmentData();
+  const manualInputs = rawManualInputs ?? EMPTY_INPUTS;
 
-  const [collapsed, setCollapsed] = useState(false);
   const [formLength, setFormLength] = useState<number>(1);
   const [formElevM, setFormElevM] = useState<number>(0);
   const [elevUnit, setElevUnit] = useState<'m' | '%'>('m');
@@ -76,21 +72,8 @@ const ManualSegmentEditor: React.FC = () => {
   const typeLabels = { uphill: t.typeUphill, downhill: t.typeDownhill, flat: t.typeFlat };
   const tableRows = manualInputs.map(r => ({ ...r, typeLabel: typeLabels[r.type] }));
 
-  const cardTitle = (
-    <div className="collapsible-card-title">
-      <Button
-        icon={`pi pi-chevron-${collapsed ? 'down' : 'up'}`}
-        text rounded
-        className="collapsible-card-btn"
-        onClick={(e) => { e.stopPropagation(); setCollapsed(c => !c); }}
-      />
-      <span>{t.manualEditorCard}</span>
-    </div>
-  );
-
   return (
-    <Card title={cardTitle} className="mb-3">
-      {collapsed ? null : <>
+    <CollapsibleCard title={t.manualEditorCard} className="mb-3">
       {editingUid && (
         <div className="edit-banner">
           <i className="pi pi-pencil" />
@@ -217,8 +200,7 @@ const ManualSegmentEditor: React.FC = () => {
       ) : (
         <div className="manual-empty">{t.manualEmpty}</div>
       )}
-      </>}
-    </Card>
+    </CollapsibleCard>
   );
 };
 

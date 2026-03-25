@@ -1,20 +1,20 @@
 import React from 'react';
-import { useSelector } from 'react-redux';
 import { Button } from 'primereact/button';
-import type { RootState } from '../store';
 import { generateGarminJson } from '../services/garminJsonService';
 import type { GarminWorkoutStep } from '../services/garminJsonService';
 import { formatPace } from '../services/formatters';
 import { useT } from '../i18n/useT';
+import { useSegmentData } from '../hooks/useSegmentData';
+import { useGpxData } from '../hooks/useGpxData';
+import { useAppSettings } from '../hooks/useAppSettings';
+import { useResults } from '../hooks/useResults';
 
 const FitExport: React.FC<{ id?: string }> = ({ id }) => {
   const t = useT();
-  const segments       = useSelector((s: RootState) => s.segments.segments);
-  const segmentResults = useSelector((s: RootState) => s.results.segmentResults);
-  const fileName       = useSelector((s: RootState) => s.gpx.fileName);
-  const totalDistance  = useSelector((s: RootState) => s.gpx.totalDistance);
-  const targetPaceSec  = useSelector((s: RootState) => s.settings.targetPaceSeconds);
-  const appMode        = useSelector((s: RootState) => s.settings.appMode);
+  const { segments }                    = useSegmentData();
+  const { segmentResults }              = useResults();
+  const { fileName, totalDistance }     = useGpxData();
+  const { targetPaceSeconds: targetPaceSec, appMode } = useAppSettings();
 
   const handleExport = () => {
     if (segments.length === 0) return;

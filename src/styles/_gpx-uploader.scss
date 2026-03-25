@@ -1,0 +1,90 @@
+.file-icon {
+  color: $color-downhill;
+  font-size: 1.2rem;
+}
+
+.file-name {
+  font-weight: 500;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 180px;
+}
+
+// Three-column grid: Smoothing / Slope threshold / Min segment length
+.gpx-params {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  column-gap: 0.75rem;
+  row-gap: 0.5rem;
+}
+
+// display:contents lets labels and inputs participate directly in the parent grid,
+// placing labels in row 1 and inputs in row 2 across all three columns.
+.gpx-param {
+  display: contents;
+
+  label {
+    grid-row: 1;
+    align-self: start;
+  }
+
+  > :last-child {
+    grid-row: 2;
+    align-self: end;
+  }
+}
+
+.gpx-loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.6rem;
+  padding: 2rem 1rem;
+  color: $color-text-muted;
+
+  &__icon { font-size: 1.2rem; }
+}
+
+.sample-routes-dropdown {
+  width: 100%;
+  margin-bottom: 0.75rem;
+}
+
+.drop-zone {
+  border: 2px dashed $color-border;
+  border-radius: 8px;
+  padding: 2rem 1rem;
+  text-align: center;
+  cursor: pointer;
+  background: $color-bg;
+  transition: border-color 0.15s, background 0.15s;
+  user-select: none;
+
+  &--dragging {
+    border-color: $color-primary;
+    background: $color-primary-light;
+  }
+
+  &__icon {
+    font-size: 2rem;
+    color: $color-text-faint;
+    display: block;
+    margin-bottom: 0.5rem;
+
+    &--dragging { color: $color-primary; }
+  }
+
+  &__title {
+    font-weight: 600;
+    color: $color-text-secondary;
+
+    &--dragging { color: $color-primary-dark; }
+  }
+
+  &__hint {
+    font-size: 0.8rem;
+    color: $color-text-faint;
+    margin-top: 0.25rem;
+  }
+}

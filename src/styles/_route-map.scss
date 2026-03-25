@@ -1,0 +1,11 @@
+// Remove card padding so the Leaflet map fills edge-to-edge inside the card
+.route-map-card .p-card-content {
+  padding: 0 !important;
+  overflow: hidden;
+  border-radius: 0 0 6px 6px;
+}
+
+.route-map {
+  width: 100%;
+  height: 340px;
+}

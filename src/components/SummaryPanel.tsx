@@ -1,13 +1,16 @@
 import React from 'react';
-import { useSelector, useDispatch } from 'react-redux';
+import { useDispatch } from 'react-redux';
 import { Card } from 'primereact/card';
 import { Button } from 'primereact/button';
 import { MultiSelect } from 'primereact/multiselect';
-import type { RootState, AppDispatch } from '../store';
+import type { AppDispatch } from '../store';
 import { setVisibleStats } from '../store/settingsSlice';
 import { formatPace, formatTime } from '../services/formatters';
 import { useT } from '../i18n/useT';
 import { useHoveredSegment } from '../contexts/HoveredSegment';
+import { useGpxData } from '../hooks/useGpxData';
+import { useAppSettings } from '../hooks/useAppSettings';
+import { useResults } from '../hooks/useResults';
 
 const ALL_STAT_KEYS = ['distance', 'ascent', 'descent', 'time', 'pace', 'basePace', 'fastest', 'slowest'] as const;
 type StatKey = typeof ALL_STAT_KEYS[number];
@@ -16,11 +19,10 @@ const SummaryPanel: React.FC = () => {
   const t = useT();
   const dispatch = useDispatch<AppDispatch>();
   const { hoveredId, setHoveredId } = useHoveredSegment();
-  const { totalDistance, totalElevationGain, totalElevationLoss } = useSelector((s: RootState) => s.gpx);
-  const targetPaceSeconds = useSelector((s: RootState) => s.settings.targetPaceSeconds);
-  const basePace          = useSelector((s: RootState) => s.results.basePace);
-  const segmentResults    = useSelector((s: RootState) => s.results.segmentResults);
-  const visibleStats      = (useSelector((s: RootState) => s.settings.visibleStats) ?? [...ALL_STAT_KEYS]) as StatKey[];
+  const { totalDistance, totalElevationGain, totalElevationLoss } = useGpxData();
+  const { targetPaceSeconds, visibleStats: rawVisibleStats } = useAppSettings();
+  const { basePace, segmentResults } = useResults();
+  const visibleStats = (rawVisibleStats ?? [...ALL_STAT_KEYS]) as StatKey[];
 
   const totalTimeSec = (totalDistance / 1000) * targetPaceSeconds;
 

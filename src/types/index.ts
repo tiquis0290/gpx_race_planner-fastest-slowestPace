@@ -7,6 +7,12 @@ export interface GpxPoint {
 
 export type SegmentType = 'uphill' | 'downhill' | 'flat';
 
+export const TYPE_SEVERITY: Record<SegmentType, 'danger' | 'success' | 'secondary'> = {
+  uphill: 'danger',
+  downhill: 'success',
+  flat: 'secondary',
+};
+
 export interface Segment {
   id: number;
   startDistance: number; // meters

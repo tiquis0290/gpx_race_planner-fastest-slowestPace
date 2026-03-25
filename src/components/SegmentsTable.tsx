@@ -1,17 +1,23 @@
-import React, { useState, useEffect, useRef } from 'react';
-import { useSelector, useDispatch } from 'react-redux';
-import { Card } from 'primereact/card';
-import { Button } from 'primereact/button';
+import React, { useEffect, useRef } from 'react';
+import { useDispatch } from 'react-redux';
 import { DataTable } from 'primereact/datatable';
 import { Column } from 'primereact/column';
 import { Tag } from 'primereact/tag';
 import { MultiSelect } from 'primereact/multiselect';
-import type { RootState, AppDispatch } from '../store';
+import type { AppDispatch } from '../store';
 import { setVisibleColumns } from '../store/settingsSlice';
+import CollapsibleCard from './CollapsibleCard';
+import { useSegmentData } from '../hooks/useSegmentData';
+import { useResults } from '../hooks/useResults';
+import { useAppSettings } from '../hooks/useAppSettings';
 import type { Segment, SegmentResult, SegmentType } from '../types';
+import { TYPE_SEVERITY } from '../types';
 import { formatPace, formatTimeMinSec, formatTime } from '../services/formatters';
 import { useT } from '../i18n/useT';
 import { useHoveredSegment } from '../contexts/HoveredSegment';
+
+const ALL_COL_KEYS = ['fromTo', 'lengthKm', 'elev', 'avgSlope', 'type', 'pace', 'segTime', 'cumTime', 'avgPace'] as const;
+type ColKey = typeof ALL_COL_KEYS[number];
 
 interface RowData {
   id: number;
@@ -28,25 +34,17 @@ interface RowData {
   avgPace: string;
 }
 
-const TYPE_SEVERITY: Record<SegmentType, 'danger' | 'success' | 'secondary'> = {
-  uphill: 'danger',
-  downhill: 'success',
-  flat: 'secondary',
-};
 
-const ALL_COL_KEYS = ['fromTo', 'lengthKm', 'elev', 'avgSlope', 'type', 'pace', 'segTime', 'cumTime', 'avgPace'] as const;
-type ColKey = typeof ALL_COL_KEYS[number];
 
 const SegmentsTable: React.FC = () => {
   const t = useT();
   const dispatch = useDispatch<AppDispatch>();
   const { hoveredId, setHoveredId } = useHoveredSegment();
-  const [collapsed, setCollapsed] = useState(false);
   const tableRef = useRef<DataTable<RowData[]>>(null);
-  const segments = useSelector((s: RootState) => s.segments.segments);
-  const segmentResults = useSelector((s: RootState) => s.results.segmentResults);
-  const targetPaceSeconds = useSelector((s: RootState) => s.settings.targetPaceSeconds);
-  const visibleCols = (useSelector((s: RootState) => s.settings.visibleColumns) ?? [...ALL_COL_KEYS]) as ColKey[];
+  const { segments } = useSegmentData();
+  const { segmentResults } = useResults();
+  const { targetPaceSeconds, visibleColumns } = useAppSettings();
+  const visibleCols = (visibleColumns ?? [...ALL_COL_KEYS]) as ColKey[];
 
   useEffect(() => {
     if (hoveredId === null || !tableRef.current) return;
@@ -118,30 +116,22 @@ const SegmentsTable: React.FC = () => {
   });
 
   return (
-    <Card className="mb-3">
-      <div className="seg-table-card-header">
-        <div className="seg-table-card-controls">
-          <Button
-            icon={`pi pi-chevron-${collapsed ? 'down' : 'up'}`}
-            text rounded
-            className="collapsible-card-btn"
-            onClick={() => setCollapsed(c => !c)}
-          />
-          <span className="seg-table-title">{t.segCardTitle(segments.length)}</span>
-        </div>
-        {!collapsed && (
-          <MultiSelect
-            value={visibleCols}
-            options={colOptions}
-            optionValue="value"
-            onChange={(e) => dispatch(setVisibleColumns(e.value))}
-            maxSelectedLabels={0}
-            selectedItemsLabel={t.colColumns}
-            className="col-selector"
-          />
-        )}
-      </div>
-      {!collapsed && (() => {
+    <CollapsibleCard
+      title={t.segCardTitle(segments.length)}
+      className="mb-3"
+      headerExtra={(collapsed) => !collapsed && (
+        <MultiSelect
+          value={visibleCols}
+          options={colOptions}
+          optionValue="value"
+          onChange={(e) => dispatch(setVisibleColumns(e.value))}
+          maxSelectedLabels={0}
+          selectedItemsLabel={t.colColumns}
+          className="col-selector"
+        />
+      )}
+    >
+      {(() => {
         const columns = [
           <Column key="id" field="id" header={t.colNum} style={{ width: '3rem' }} />,
         ];
@@ -180,7 +170,7 @@ const SegmentsTable: React.FC = () => {
           </DataTable>
         );
       })()}
-    </Card>
+    </CollapsibleCard>
   );
 };
 

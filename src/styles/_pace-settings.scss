@@ -1,0 +1,11 @@
+// Two side-by-side inputs: pace (min/km) and total time (h:mm:ss)
+.pace-inputs {
+  display: flex;
+  gap: 0.75rem;
+  align-items: flex-end;
+}
+
+.pace-input {
+  flex: 1 1 0;
+  min-width: 0;
+}

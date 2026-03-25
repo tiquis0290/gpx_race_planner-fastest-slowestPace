@@ -122,6 +122,7 @@ const sk = {
   manualSave: 'Uložiť',
   manualCancel: 'Zrušiť',
   builtAt: 'Zostavené:',
+  github: 'GitHub',
 } as const;
 
 export default sk;

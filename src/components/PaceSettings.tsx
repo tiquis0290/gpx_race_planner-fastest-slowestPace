@@ -1,11 +1,12 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
-import { Card } from 'primereact/card';
-import { Button } from 'primereact/button';
+import { useDispatch } from 'react-redux';
 import { InputText } from 'primereact/inputtext';
 import { SelectButton } from 'primereact/selectbutton';
-import type { RootState, AppDispatch } from '../store';
+import CollapsibleCard from './CollapsibleCard';
+import type { AppDispatch } from '../store';
 import { setTargetMode, setTargetPaceSeconds, setTargetTimeSeconds } from '../store/settingsSlice';
+import { useAppSettings } from '../hooks/useAppSettings';
+import { useGpxData } from '../hooks/useGpxData';
 import { setIsCalculating } from '../store/resultsSlice';
 import { formatPace, formatTime, parsePace, parseTimeHMS } from '../services/formatters';
 import { useT } from '../i18n/useT';
@@ -13,10 +14,9 @@ import { useT } from '../i18n/useT';
 const PaceSettings: React.FC = () => {
   const dispatch = useDispatch<AppDispatch>();
   const t = useT();
-  const { targetMode, targetPaceSeconds, targetTimeSeconds } = useSelector((s: RootState) => s.settings);
-  const totalDistance = useSelector((s: RootState) => s.gpx.totalDistance);
+  const { targetMode, targetPaceSeconds, targetTimeSeconds } = useAppSettings();
+  const { totalDistance } = useGpxData();
 
-  const [collapsed, setCollapsed] = useState(false);
   const [paceInput, setPaceInput] = useState(formatPace(targetPaceSeconds));
   const [timeInput, setTimeInput] = useState(formatTime(targetTimeSeconds));
   const [paceError, setPaceError] = useState('');
@@ -68,21 +68,8 @@ const PaceSettings: React.FC = () => {
     { label: t.modeTime, value: 'time' },
   ];
 
-  const cardTitle = (
-    <div className="collapsible-card-title">
-      <Button
-        icon={`pi pi-chevron-${collapsed ? 'down' : 'up'}`}
-        text rounded
-        className="collapsible-card-btn"
-        onClick={(e) => { e.stopPropagation(); setCollapsed(c => !c); }}
-      />
-      <span>{t.paceCard}</span>
-    </div>
-  );
-
   return (
-    <Card title={cardTitle} className="mb-3">
-      {collapsed ? null : <>
+    <CollapsibleCard title={t.paceCard} className="mb-3">
       <div className="mb-3">
         <SelectButton value={targetMode} options={modeOptions} disabled />
       </div>
@@ -111,8 +98,7 @@ const PaceSettings: React.FC = () => {
         </div>
       </div>
       {totalDistance === 0 && <small className="text-color-secondary mt-2 block">{t.paceHint}</small>}
-      </>}
-    </Card>
+    </CollapsibleCard>
   );
 };
 

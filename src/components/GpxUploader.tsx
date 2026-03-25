@@ -1,6 +1,5 @@
 import React, { useCallback, useRef, useState } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
-import { Card } from 'primereact/card';
+import { useDispatch } from 'react-redux';
 import { Button } from 'primereact/button';
 import { Dropdown } from 'primereact/dropdown';
 import { InputNumber } from 'primereact/inputnumber';
@@ -9,20 +8,22 @@ import { buildSegments } from '../services/segmentationService';
 import { setGpxData, resetGpx } from '../store/gpxSlice';
 import { setSegments, resetSegments, setSmoothingWindow, setSlopeThreshold, setMinSegmentLength } from '../store/segmentsSlice';
 import { resetResults, setIsCalculating } from '../store/resultsSlice';
-import type { RootState, AppDispatch } from '../store';
+import type { AppDispatch } from '../store';
 import HelpIcon from './HelpIcon';
+import CollapsibleCard from './CollapsibleCard';
+import { useGpxData } from '../hooks/useGpxData';
+import { useSegmentData } from '../hooks/useSegmentData';
 import { useT } from '../i18n/useT';
 import samples from '../samples.json';
 
 const GpxUploader: React.FC = () => {
   const dispatch = useDispatch<AppDispatch>();
   const t = useT();
-  const fileName = useSelector((s: RootState) => s.gpx.fileName);
-  const { slopeThreshold, minSegmentLength, smoothingWindow } = useSelector((s: RootState) => s.segments);
+  const { fileName } = useGpxData();
+  const { slopeThreshold, minSegmentLength, smoothingWindow } = useSegmentData();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [dragging, setDragging] = useState(false);
   const [loading, setLoading] = useState(false);
-  const [collapsed, setCollapsed] = useState(false);
 
   const processGpxText = useCallback(
     (text: string, name: string) => {
@@ -86,21 +87,8 @@ const GpxUploader: React.FC = () => {
   const handleDrop      = (e: React.DragEvent) => { e.preventDefault(); setDragging(false); const file = e.dataTransfer.files?.[0]; if (file) processFile(file); };
   const handleReset     = () => { dispatch(resetGpx()); dispatch(resetSegments()); dispatch(resetResults()); };
 
-  const cardTitle = (
-    <div className="collapsible-card-title">
-      <Button
-        icon={`pi pi-chevron-${collapsed ? 'down' : 'up'}`}
-        text rounded
-        className="collapsible-card-btn"
-        onClick={(e) => { e.stopPropagation(); setCollapsed(c => !c); }}
-      />
-      <span>{t.gpxCard}</span>
-    </div>
-  );
-
   return (
-    <Card title={cardTitle} className="mb-3">
-      {collapsed ? null : <>
+    <CollapsibleCard title={t.gpxCard} className="mb-3">
       {fileName ? (
         <div>
           <div className="flex align-items-center gap-2 mb-3">
@@ -167,8 +155,7 @@ const GpxUploader: React.FC = () => {
           </>)}
         </>
       )}
-    </>}
-    </Card>
+    </CollapsibleCard>
   );
 };
 

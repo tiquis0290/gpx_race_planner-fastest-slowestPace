@@ -1,19 +1,20 @@
 import React, { useState } from 'react';
-import { useSelector, useDispatch } from 'react-redux';
+import { useDispatch } from 'react-redux';
 import { Menubar } from 'primereact/menubar';
-import { Card } from 'primereact/card';
-import { Button } from 'primereact/button';
 import { SelectButton } from 'primereact/selectbutton';
-import { ConfirmDialog, confirmDialog } from 'primereact/confirmdialog';
 import type { MenuItem } from 'primereact/menuitem';
+import CollapsibleCard from './components/CollapsibleCard';
+import ResetConfirmDialog from './components/ResetConfirmDialog';
+import { useGpxData } from './hooks/useGpxData';
+import { useSegmentData } from './hooks/useSegmentData';
+import { useAppSettings } from './hooks/useAppSettings';
+import { useResults } from './hooks/useResults';
+import { useFullReset } from './hooks/useFullReset';
 
-import type { RootState, AppDispatch } from './store';
-import { resetGpx } from './store/gpxSlice';
-import { resetSegments, resetManualInputs } from './store/segmentsSlice';
-import { resetResults } from './store/resultsSlice';
-import { setLanguage, setAppMode, resetSettings } from './store/settingsSlice';
-import type { Lang } from './i18n/translations';
+import type { AppDispatch } from './store';
+import { setLanguage, setAppMode } from './store/settingsSlice';
 import { useT } from './i18n/useT';
+import { LANGS, GITHUB_URL, AUTHOR_URL, AUTHOR_LABEL } from './constants';
 
 import GpxUploader from './components/GpxUploader';
 import ManualSegmentEditor from './components/ManualSegmentEditor';
@@ -30,54 +31,16 @@ import RouteMap from './components/RouteMap';
 import HelpDialog from './components/HelpDialog';
 import { HoveredSegmentProvider } from './contexts/HoveredSegment';
 
-const LANGS: { value: Lang; label: string }[] = [
-  { value: 'cs', label: 'CS' },
-  { value: 'sk', label: 'SK' },
-  { value: 'en', label: 'EN' },
-];
 
 const App: React.FC = () => {
   const dispatch = useDispatch<AppDispatch>();
   const t = useT();
-  const smoothedPoints  = useSelector((s: RootState) => s.gpx.smoothedPoints);
-  const segments        = useSelector((s: RootState) => s.segments.segments);
-  const fileName        = useSelector((s: RootState) => s.gpx.fileName);
-  const language        = useSelector((s: RootState) => s.settings.language);
-  const appMode         = useSelector((s: RootState) => s.settings.appMode);
-  const isCalculating   = useSelector((s: RootState) => s.results.isCalculating);
+  const { smoothedPoints, fileName } = useGpxData();
+  const { segments }                 = useSegmentData();
+  const { language, appMode }        = useAppSettings();
+  const { isCalculating }            = useResults();
   const [helpVisible, setHelpVisible] = useState(false);
-  const [mapCollapsed, setMapCollapsed] = useState(false);
-  const [chartCollapsed, setChartCollapsed] = useState(false);
-
-  const collapseTitle = (title: string, collapsed: boolean, toggle: () => void) => (
-    <div className="collapsible-card-title">
-      <Button
-        icon={`pi pi-chevron-${collapsed ? 'down' : 'up'}`}
-        text rounded
-        className="collapsible-card-btn"
-        onClick={(e) => { e.stopPropagation(); toggle(); }}
-      />
-      <span>{title}</span>
-    </div>
-  );
-
-  const handleFullReset = () => {
-    confirmDialog({
-      message: t.resetConfirmMessage,
-      header: t.resetConfirmHeader,
-      icon: 'pi pi-exclamation-triangle',
-      acceptLabel: t.resetConfirmAccept,
-      rejectLabel: t.resetConfirmReject,
-      acceptClassName: 'p-button-danger',
-      accept: () => {
-        dispatch(resetGpx());
-        dispatch(resetSegments());
-        dispatch(resetManualInputs());
-        dispatch(resetResults());
-        dispatch(resetSettings());
-      },
-    });
-  };
+  const handleFullReset = useFullReset();
 
   const modeOptions = [
     { label: t.modeGpx, value: 'gpx' },
@@ -131,7 +94,7 @@ const App: React.FC = () => {
     <div className="app-root">
       {appMode === 'gpx' ? <SegmentationWatcher /> : <ManualSegmentWatcher />}
       <ResultsCalculator />
-      <ConfirmDialog />
+      <ResetConfirmDialog />
       <HelpDialog language={language} visible={helpVisible} onHide={() => setHelpVisible(false)} />
 
       <Menubar
@@ -166,13 +129,13 @@ const App: React.FC = () => {
               </div>
             )}
             {appMode === 'gpx' && fileName && smoothedPoints.length > 0 && segments.length > 0 && (
-              <Card title={collapseTitle(t.mapCard, mapCollapsed, () => setMapCollapsed(c => !c))} className="mb-3 route-map-card">
-                {!mapCollapsed && <RouteMap points={smoothedPoints} segments={segments} />}
-              </Card>
+              <CollapsibleCard title={t.mapCard} className="mb-3 route-map-card">
+                <RouteMap points={smoothedPoints} segments={segments} />
+              </CollapsibleCard>
             )}
 
-            <Card title={collapseTitle(t.chartCard, chartCollapsed, () => setChartCollapsed(c => !c))} className="mb-3">
-              {!chartCollapsed && (smoothedPoints.length > 0 ? (
+            <CollapsibleCard title={t.chartCard} className="mb-3">
+              {smoothedPoints.length > 0 ? (
                 <ElevationChart points={smoothedPoints} segments={segments} />
               ) : (
                 <div className="chart-empty">
@@ -184,8 +147,8 @@ const App: React.FC = () => {
                     {appMode === 'gpx' ? t.emptyDesc : t.manualEmptyChartHint}
                   </p>
                 </div>
-              ))}
-            </Card>
+              )}
+            </CollapsibleCard>
 
             {segments.length > 0 && <SegmentsTable />}
           </div>
@@ -193,12 +156,12 @@ const App: React.FC = () => {
       </div>
 
       <footer className="app-footer">
-        <a href="https://github.com/martinkobelka/gpx_race_planner" target="_blank" rel="noopener" className="app-footer__link">
-          <i className="pi pi-github" /> GitHub
+        <a href={GITHUB_URL} target="_blank" rel="noopener" className="app-footer__link">
+          <i className="pi pi-github" /> {t.github}
         </a>
         <span className="app-footer__sep">·</span>
-        <a href="https://martinkobelka.cz" target="_blank" rel="noopener" className="app-footer__link">
-          martinkobelka.cz
+        <a href={AUTHOR_URL} target="_blank" rel="noopener" className="app-footer__link">
+          {AUTHOR_LABEL}
         </a>
         <span className="app-footer__sep">·</span>
         <span className="app-footer__meta">v{__APP_VERSION__}</span>

@@ -1,0 +1,9 @@
+// Typography
+.text-sm     { font-size: 0.875rem; }
+.font-medium { font-weight: 500; }
+
+// Semantic colors for segment types
+.text-uphill   { color: $color-uphill; }
+.text-downhill { color: $color-downhill; }
+.text-neutral  { color: $color-flat; }
+.text-faint    { color: $color-text-faint; }
