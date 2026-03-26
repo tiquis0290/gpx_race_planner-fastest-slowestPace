@@ -90,7 +90,7 @@ export function buildSegments(
   rawSegments.push({ startIdx: start, endIdx: types.length, type: types[types.length - 1] });
 
   // Eliminate too-short segments by merging with neighbours
-  const result: RawSegment[] = [];
+  let result: RawSegment[] = [];
   for (var i = 0; i < rawSegments.length; i++) {
     const seg = rawSegments[i];
     const startPt = points[seg.startIdx];
@@ -111,10 +111,36 @@ export function buildSegments(
   }
   rawSegments = result;
 
-  return rawSegments.map((r, idx) => makeSegment(idx + 1, r, points, slopeThreshold));
+  result = [];
+  rawSegments[0].type = typeOfSegment(rawSegments[0], points, slopeThreshold);
+  for (let i = 1; i < rawSegments.length; i++) {
+    rawSegments[i].type = typeOfSegment(rawSegments[i], points, slopeThreshold);
+    if (rawSegments[i].type === rawSegments[i - 1].type) {
+      rawSegments[i].startIdx = rawSegments[i - 1].startIdx;
+    }
+    else {
+      result.push(rawSegments[i - 1]);
+    }
+  }
+  rawSegments = result;
+
+
+  return rawSegments.map((r, idx) => makeSegment(idx + 1, r, points));
 }
 
-function makeSegment(id: number, raw: RawSegment, points: GpxPoint[], slopeThreshold: number): Segment {
+function typeOfSegment(seg: RawSegment, points: GpxPoint[], slopeThreshold: number): SegmentType {
+  const startPt = points[seg.startIdx];
+  const endPt = points[Math.min(seg.endIdx, points.length - 1)];
+  const deltaElev = endPt.elevation - startPt.elevation;
+  const deltaDist = endPt.distance - startPt.distance;
+  if (deltaDist === 0) return 'flat';
+  const slope = (deltaElev / deltaDist) * 1000; // m/km
+  if (slope > slopeThreshold) return 'uphill';
+  if (slope < -slopeThreshold) return 'downhill';
+  return 'flat';
+}
+
+function makeSegment(id: number, raw: RawSegment, points: GpxPoint[]): Segment {
   const startPt = points[raw.startIdx];
   const endPt = points[Math.min(raw.endIdx, points.length - 1)];
   const length = endPt.distance - startPt.distance;
@@ -130,8 +156,6 @@ function makeSegment(id: number, raw: RawSegment, points: GpxPoint[], slopeThres
   const elevDelta = endPt.elevation - startPt.elevation;
   const avgSlope = length > 0 ? (elevDelta / length) * 100 : 0;
 
-  const type = avgSlope > slopeThreshold/10 ? 'uphill' : avgSlope < -slopeThreshold/10 ? 'downhill' : 'flat';
-
   return {
     id,
     startDistance: startPt.distance,
@@ -142,7 +166,7 @@ function makeSegment(id: number, raw: RawSegment, points: GpxPoint[], slopeThres
     elevationGain: elevGain,
     elevationLoss: elevLoss,
     avgSlope,
-    type: type,
+    type: raw.type,
   };
 }
 
