@@ -9,7 +9,12 @@
   gap: 0.25rem;
   width: 100%;
 
-  &__extra { margin-left: auto; }
+  &__extra {
+    margin-left: auto;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
 }
 
 .collapsible-card-btn.p-button {
@@ -18,4 +23,51 @@
   padding: 0;
   font-size: 0.7rem;
   flex-shrink: 0;
+}
+
+.collapsible-card-body {
+  display: grid;
+  grid-template-rows: 1fr;
+  transition: grid-template-rows 0.25s ease;
+
+  > div {
+    overflow: hidden;
+    min-height: 0;
+  }
+
+  &--collapsed {
+    grid-template-rows: 0fr;
+  }
+}
+
+.collapsible-card-fs:fullscreen {
+  background: $color-surface;
+  overflow: auto;
+  display: flex;
+  flex-direction: column;
+
+  > .p-card {
+    flex: 1;
+    border-radius: 0;
+    display: flex;
+    flex-direction: column;
+
+    .p-card-body,
+    .p-card-content {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+    }
+  }
+
+  .route-map {
+    height: calc(100vh - 56px);
+    height: calc(100svh - 56px);
+  }
+
+  .elevation-scroll-container {
+    flex: 1;
+    min-width: 0;
+  }
 }

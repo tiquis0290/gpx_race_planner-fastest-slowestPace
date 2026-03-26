@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { smoothElevations, computeElevationStats } from '../../src/services/gpxService';
+import { parseGpx, smoothElevations, computeElevationStats } from '../../src/services/gpxService';
 import type { GpxPoint } from '../../src/types/index';
 
 const pt = (elevation: number, distance: number): GpxPoint => ({ lat: 0, lon: 0, elevation, distance });
@@ -91,5 +91,66 @@ describe('computeElevationStats', () => {
     const { totalElevationGain, totalElevationLoss } = computeElevationStats([]);
     expect(totalElevationGain).toBe(0);
     expect(totalElevationLoss).toBe(0);
+  });
+});
+
+// --- parseGpx ---
+
+function makeGpx(points: { lat: number; lon: number; ele: number }[]): string {
+  const trkpts = points
+    .map(p => `<trkpt lat="${p.lat}" lon="${p.lon}"><ele>${p.ele}</ele></trkpt>`)
+    .join('\n');
+  return `<?xml version="1.0" encoding="UTF-8"?>
+<gpx version="1.1"><trk><trkseg>${trkpts}</trkseg></trk></gpx>`;
+}
+
+describe('parseGpx', () => {
+  it('parses lat, lon and elevation from a single point', () => {
+    const [p] = parseGpx(makeGpx([{ lat: 49.2, lon: 16.6, ele: 250 }]));
+    expect(p.lat).toBe(49.2);
+    expect(p.lon).toBe(16.6);
+    expect(p.elevation).toBe(250);
+  });
+
+  it('first point always has distance 0', () => {
+    const pts = parseGpx(makeGpx([
+      { lat: 49.0, lon: 16.0, ele: 300 },
+      { lat: 49.001, lon: 16.0, ele: 310 },
+    ]));
+    expect(pts[0].distance).toBe(0);
+  });
+
+  it('second point has positive distance (Haversine)', () => {
+    // ~111 m per 0.001° of latitude
+    const pts = parseGpx(makeGpx([
+      { lat: 49.0, lon: 16.0, ele: 0 },
+      { lat: 49.001, lon: 16.0, ele: 0 },
+    ]));
+    expect(pts[1].distance).toBeGreaterThan(50);
+    expect(pts[1].distance).toBeLessThan(200);
+  });
+
+  it('distance is cumulative across three collinear points', () => {
+    const pts = parseGpx(makeGpx([
+      { lat: 49.0, lon: 16.0, ele: 0 },
+      { lat: 49.001, lon: 16.0, ele: 0 },
+      { lat: 49.002, lon: 16.0, ele: 0 },
+    ]));
+    expect(pts[2].distance).toBeGreaterThan(pts[1].distance);
+    // Equal spacing → pts[2] ≈ 2 × pts[1]
+    expect(pts[2].distance / pts[1].distance).toBeCloseTo(2, 1);
+  });
+
+  it('throws when GPX contains no track points', () => {
+    expect(() => parseGpx('<gpx version="1.1"></gpx>')).toThrow();
+  });
+
+  it('returns the correct number of points', () => {
+    const xml = makeGpx([
+      { lat: 49.0, lon: 16.0, ele: 100 },
+      { lat: 49.001, lon: 16.0, ele: 110 },
+      { lat: 49.002, lon: 16.0, ele: 120 },
+    ]);
+    expect(parseGpx(xml)).toHaveLength(3);
   });
 });

@@ -30,21 +30,27 @@ export function useElevationCursor(
     return (cursorX / chartW) * totalDist;
   }, [cursorX, chartW, totalDist]);
 
-  const cursorElev = useMemo(() => {
-    if (cursorDist === null || points.length === 0) return null;
-    if (cursorDist <= points[0].distance) return points[0].elevation;
-    if (cursorDist >= points[points.length - 1].distance) return points[points.length - 1].elevation;
-    for (let i = 0; i < points.length - 1; i++) {
-      const p1 = points[i], p2 = points[i + 1];
-      if (cursorDist >= p1.distance && cursorDist <= p2.distance) {
-        const span = p2.distance - p1.distance;
-        if (span <= 0) return p1.elevation;
-        const frac = (cursorDist - p1.distance) / span;
-        return p1.elevation + (p2.elevation - p1.elevation) * frac;
-      }
+  const cursorPointIndex = useMemo(() => {
+    if (cursorDist === null || points.length < 2) return null;
+    if (cursorDist <= points[0].distance) return 0;
+    if (cursorDist >= points[points.length - 1].distance) return points.length - 2;
+    let lo = 0, hi = points.length - 2;
+    while (lo < hi) {
+      const mid = (lo + hi) >> 1;
+      if (points[mid + 1].distance < cursorDist) lo = mid + 1;
+      else hi = mid;
     }
-    return null;
+    return lo;
   }, [cursorDist, points]);
+
+  const cursorElev = useMemo(() => {
+    if (cursorDist === null || cursorPointIndex === null) return null;
+    const p1 = points[cursorPointIndex], p2 = points[cursorPointIndex + 1];
+    const span = p2.distance - p1.distance;
+    if (span <= 0) return p1.elevation;
+    const frac = (cursorDist - p1.distance) / span;
+    return p1.elevation + (p2.elevation - p1.elevation) * frac;
+  }, [cursorDist, cursorPointIndex, points]);
 
   const cursorMarkerY = useMemo(() => {
     if (cursorElev === null) return null;
@@ -53,19 +59,12 @@ export function useElevationCursor(
   }, [cursorElev]);
 
   const cursorGrade = useMemo(() => {
-    if (cursorDist === null || points.length === 0) return null;
-    if (cursorDist <= points[0].distance) return 0;
-    if (cursorDist >= points[points.length - 1].distance) return 0;
-    for (let i = 0; i < points.length - 1; i++) {
-      const p1 = points[i], p2 = points[i + 1];
-      if (cursorDist >= p1.distance && cursorDist <= p2.distance) {
-        const span = p2.distance - p1.distance;
-        if (span <= 0) return 0;
-        return (p2.elevation - p1.elevation) / span;
-      }
-    }
-    return null;
-  }, [cursorDist, points]);
+    if (cursorPointIndex === null) return null;
+    const p1 = points[cursorPointIndex], p2 = points[cursorPointIndex + 1];
+    const span = p2.distance - p1.distance;
+    if (span <= 0) return 0;
+    return (p2.elevation - p1.elevation) / span;
+  }, [cursorPointIndex, points]);
 
   const segment = useMemo(() => {
     if (hoveredId === null) return null;

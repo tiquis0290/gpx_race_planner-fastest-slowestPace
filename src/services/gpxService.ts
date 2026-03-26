@@ -44,18 +44,28 @@ export function parseGpx(xmlText: string): GpxPoint[] {
 }
 
 export function smoothElevations(points: GpxPoint[], windowSize: number): GpxPoint[] {
+  if (points.length === 0) return points;
   const half = Math.floor(windowSize / 2);
-  return points.map((pt, i) => {
-    const start = Math.max(0, i - half);
-    const end = Math.min(points.length - 1, i + half);
-    let sum = 0;
-    let count = 0;
-    for (let j = start; j <= end; j++) {
-      sum += points[j].elevation;
-      count++;
-    }
-    return { ...pt, elevation: sum / count };
-  });
+  const result: GpxPoint[] = new Array(points.length);
+
+  // Seed the sliding window with the first window
+  let sum = 0;
+  let lo = 0;
+  let hi = Math.min(half, points.length - 1);
+  for (let j = lo; j <= hi; j++) sum += points[j].elevation;
+
+  for (let i = 0; i < points.length; i++) {
+    // Expand right edge when possible
+    const newHi = Math.min(i + half, points.length - 1);
+    while (hi < newHi) { hi++; sum += points[hi].elevation; }
+    // Shrink left edge when past the start
+    const newLo = Math.max(0, i - half);
+    while (lo < newLo) { sum -= points[lo].elevation; lo++; }
+
+    result[i] = { ...points[i], elevation: sum / (hi - lo + 1) };
+  }
+
+  return result;
 }
 
 export function computeElevationStats(points: GpxPoint[]): {

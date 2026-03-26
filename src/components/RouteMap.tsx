@@ -1,12 +1,16 @@
 import React, { useEffect, useMemo } from 'react';
-import { MapContainer, TileLayer, Polyline, useMap } from 'react-leaflet';
+import { MapContainer, TileLayer, Polyline, CircleMarker, Tooltip, useMap, ScaleControl } from 'react-leaflet';
 import type { LatLngBoundsExpression, LatLngTuple } from 'leaflet';
 import type { GpxPoint, Segment } from '../types';
 import { useHoveredSegment } from '../contexts/HoveredSegment';
+import { TILE_LAYERS, DEFAULT_TILE_LAYER_ID } from '../data/tileLayers';
 
 interface Props {
   points: GpxPoint[];
   segments: Segment[];
+  kmMarkersEnabled?: boolean;
+  scaleEnabled?: boolean;
+  tileLayerId?: string;
 }
 
 const SEGMENT_COLORS: Record<string, string> = {
@@ -24,8 +28,9 @@ const BoundsFitter: React.FC<{ bounds: LatLngBoundsExpression }> = ({ bounds }) 
   return null;
 };
 
-const RouteMap: React.FC<Props> = ({ points, segments }) => {
-  const { hoveredId, setHoveredId } = useHoveredSegment();
+const RouteMap: React.FC<Props> = ({ points, segments, kmMarkersEnabled = false, scaleEnabled = true, tileLayerId = DEFAULT_TILE_LAYER_ID }) => {
+  const { hoveredId, setHoveredId, setHoveredKmDist } = useHoveredSegment();
+  const tileLayer = TILE_LAYERS.find((l) => l.id === tileLayerId) ?? TILE_LAYERS[0];
 
   // Map each segment to its subset of lat/lon points
   const segmentLines = useMemo(() => {
@@ -55,6 +60,30 @@ const RouteMap: React.FC<Props> = ({ points, segments }) => {
     [points]
   );
 
+  const kmMarkers = useMemo(() => {
+    if (!kmMarkersEnabled || points.length < 2) return [];
+    const totalDist = points[points.length - 1].distance;
+    const markers: { km: number; dist: number; pos: LatLngTuple }[] = [];
+    for (let km = 1; km * 1000 <= totalDist; km++) {
+      const dist = km * 1000;
+      let lo = 0, hi = points.length - 2;
+      while (lo < hi) {
+        const mid = (lo + hi) >> 1;
+        if (points[mid + 1].distance < dist) lo = mid + 1;
+        else hi = mid;
+      }
+      const p1 = points[lo], p2 = points[lo + 1];
+      const span = p2.distance - p1.distance;
+      const frac = span > 0 ? (dist - p1.distance) / span : 0;
+      markers.push({
+        km,
+        dist,
+        pos: [p1.lat + (p2.lat - p1.lat) * frac, p1.lon + (p2.lon - p1.lon) * frac],
+      });
+    }
+    return markers;
+  }, [points, kmMarkersEnabled]);
+
   return (
     <MapContainer
       center={center}
@@ -63,9 +92,12 @@ const RouteMap: React.FC<Props> = ({ points, segments }) => {
       zoomControl={true}
     >
       <BoundsFitter bounds={bounds} />
+      {scaleEnabled && <ScaleControl position="bottomleft" imperial={false} />}
       <TileLayer
-        attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
-        url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+        key={tileLayer.id}
+        url={tileLayer.url}
+        attribution={tileLayer.attribution}
+        maxZoom={tileLayer.maxZoom}
       />
       {segmentLines.map((seg) => {
         const isHovered = hoveredId === seg.id;
@@ -83,6 +115,23 @@ const RouteMap: React.FC<Props> = ({ points, segments }) => {
               mouseout: () => setHoveredId(null),
             }}
           />
+        );
+      })}
+      {kmMarkers.map(({ km, dist, pos }) => {
+        const seg = segments.find((s) => dist >= s.startDistance && dist <= s.endDistance);
+        return (
+          <CircleMarker
+            key={km}
+            center={pos}
+            radius={5}
+            pathOptions={{ color: '#1e293b', fillColor: '#ffffff', fillOpacity: 1, weight: 2 }}
+            eventHandlers={{
+              mouseover: () => { if (seg) setHoveredId(seg.id); setHoveredKmDist(dist); },
+              mouseout:  () => { setHoveredId(null); setHoveredKmDist(null); },
+            }}
+          >
+            <Tooltip>{km} km</Tooltip>
+          </CircleMarker>
         );
       })}
     </MapContainer>

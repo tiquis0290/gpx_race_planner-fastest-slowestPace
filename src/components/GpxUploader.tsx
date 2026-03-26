@@ -3,10 +3,9 @@ import { useDispatch } from 'react-redux';
 import { Button } from 'primereact/button';
 import { Dropdown } from 'primereact/dropdown';
 import { InputNumber } from 'primereact/inputnumber';
-import { parseGpx, smoothElevations, computeElevationStats } from '../services/gpxService';
-import { buildSegments } from '../services/segmentationService';
-import { setGpxData, resetGpx } from '../store/gpxSlice';
-import { setSegments, resetSegments, setSmoothingWindow, setSlopeThreshold, setMinSegmentLength } from '../store/segmentsSlice';
+import { parseGpx } from '../services/gpxService';
+import { setRawData, resetGpx } from '../store/gpxSlice';
+import { resetSegments, setSmoothingWindow, setSlopeThreshold, setMinSegmentLength } from '../store/segmentsSlice';
 import { resetResults, setIsCalculating } from '../store/resultsSlice';
 import type { AppDispatch } from '../store';
 import HelpIcon from './HelpIcon';
@@ -27,14 +26,9 @@ const GpxUploader: React.FC = () => {
 
   const processGpxText = useCallback(
     (text: string, name: string) => {
-      const raw = parseGpx(text);
-      const smoothed = smoothElevations(raw, smoothingWindow);
-      const { totalElevationGain, totalElevationLoss } = computeElevationStats(smoothed);
-      const totalDistance = smoothed.length > 0 ? smoothed[smoothed.length - 1].distance : 0;
-      dispatch(setGpxData({ fileName: name, rawPoints: raw, smoothedPoints: smoothed, totalDistance, totalElevationGain, totalElevationLoss }));
-      dispatch(setSegments(buildSegments(smoothed, slopeThreshold, minSegmentLength)));
+      dispatch(setRawData({ fileName: name, rawPoints: parseGpx(text) }));
     },
-    [dispatch, smoothingWindow, slopeThreshold, minSegmentLength]
+    [dispatch]
   );
 
   const processFile = useCallback(

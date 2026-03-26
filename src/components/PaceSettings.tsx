@@ -2,6 +2,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { useDispatch } from 'react-redux';
 import { InputText } from 'primereact/inputtext';
 import { SelectButton } from 'primereact/selectbutton';
+import { Dropdown } from 'primereact/dropdown';
 import CollapsibleCard from './CollapsibleCard';
 import type { AppDispatch } from '../store';
 import { setTargetMode, setTargetPaceSeconds, setTargetTimeSeconds } from '../store/settingsSlice';
@@ -10,6 +11,7 @@ import { useGpxData } from '../hooks/useGpxData';
 import { setIsCalculating } from '../store/resultsSlice';
 import { formatPace, formatTime, parsePace, parseTimeHMS } from '../services/formatters';
 import { useT } from '../i18n/useT';
+import { RUNNING_RECORDS } from '../data/records';
 
 const PaceSettings: React.FC = () => {
   const dispatch = useDispatch<AppDispatch>();
@@ -68,6 +70,19 @@ const PaceSettings: React.FC = () => {
     { label: t.modeTime, value: 'time' },
   ];
 
+  const recordOptions = RUNNING_RECORDS.map((r) => {
+    const paceSec = Math.round(r.timeSec / r.distanceKm);
+    const gender = r.gender === 'M' ? t.recordMen : t.recordWomen;
+    const distance = t[r.distanceLabelKey];
+    return {
+      label: `${distance} ${gender} ${r.recordType} – ${r.athlete} – ${formatPace(paceSec)} /km`,
+      value: paceSec,
+    };
+  });
+
+  const matchedRecords = recordOptions.filter((o) => o.value === targetPaceSeconds);
+  const matchedRecord = matchedRecords.length === 1 ? matchedRecords[0] : null;
+
   return (
     <CollapsibleCard title={t.paceCard} className="mb-3">
       <div className="mb-3">
@@ -97,6 +112,18 @@ const PaceSettings: React.FC = () => {
           {timeError && <small className="p-error block mt-1">{timeError}</small>}
         </div>
       </div>
+      {matchedRecord && (
+        <small className="text-color-secondary mt-2 block">
+          {t.recordMatches} {matchedRecord.label}
+        </small>
+      )}
+      <Dropdown
+        options={recordOptions}
+        value={null}
+        onChange={(e) => handlePaceChange(formatPace(e.value as number))}
+        placeholder={t.recordsPreset}
+        className="w-full mt-3"
+      />
       {totalDistance === 0 && <small className="text-color-secondary mt-2 block">{t.paceHint}</small>}
     </CollapsibleCard>
   );
