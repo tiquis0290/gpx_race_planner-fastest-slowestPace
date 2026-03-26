@@ -23,6 +23,12 @@ export function formatTimeMinSec(totalSeconds: number): string {
   return `${m}:${String(s).padStart(2, '0')}`;
 }
 
+/** Formats as mm:ss for times under an hour, h:mm:ss otherwise. */
+export function formatDuration(totalSeconds: number): string {
+  if (!isFinite(totalSeconds) || totalSeconds < 0) return '--:--';
+  return totalSeconds >= 3600 ? formatTime(totalSeconds) : formatTimeMinSec(totalSeconds);
+}
+
 export function parsePace(str: string): number | null {
   const match = str.match(/^(\d+):(\d{2})$/);
   if (!match) return null;

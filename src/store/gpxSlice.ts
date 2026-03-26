@@ -53,11 +53,19 @@ const gpxSlice = createSlice({
       state.totalElevationGain = action.payload.totalElevationGain;
       state.totalElevationLoss = action.payload.totalElevationLoss;
     },
+    setRawData(state, action: PayloadAction<{ fileName: string; rawPoints: GpxPoint[] }>) {
+      state.fileName           = action.payload.fileName;
+      state.rawPoints          = action.payload.rawPoints;
+      state.smoothedPoints     = [];
+      state.totalDistance      = 0;
+      state.totalElevationGain = 0;
+      state.totalElevationLoss = 0;
+    },
     resetGpx() {
       return initialState;
     },
   },
 });
 
-export const { setGpxData, setDisplayData, resetGpx } = gpxSlice.actions;
+export const { setGpxData, setDisplayData, setRawData, resetGpx } = gpxSlice.actions;
 export default gpxSlice.reducer;

@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { formatPace, formatTime, formatTimeMinSec, parsePace, parseTimeHMS } from '../../src/services/formatters';
+import { formatPace, formatTime, formatTimeMinSec, formatDuration, parsePace, parseTimeHMS } from '../../src/services/formatters';
 
 describe('formatPace', () => {
   it('formats whole minutes correctly', () => {
@@ -68,6 +68,25 @@ describe('formatTimeMinSec', () => {
 
   it('returns --:-- for negative value', () => {
     expect(formatTimeMinSec(-5)).toBe('--:--');
+  });
+});
+
+describe('formatDuration', () => {
+  it('uses mm:ss for times under an hour', () => {
+    expect(formatDuration(90)).toBe('1:30');
+    expect(formatDuration(3599)).toBe('59:59');
+  });
+
+  it('switches to h:mm:ss at exactly one hour', () => {
+    expect(formatDuration(3600)).toBe('1:00:00');
+  });
+
+  it('formats multi-hour durations correctly', () => {
+    expect(formatDuration(8588)).toBe('2:23:08'); // 143:08 was the bug
+  });
+
+  it('returns --:-- for negative value', () => {
+    expect(formatDuration(-1)).toBe('--:--');
   });
 });
 

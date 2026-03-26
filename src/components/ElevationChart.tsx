@@ -4,6 +4,7 @@ import type { GpxPoint, Segment } from '../types';
 import { useT } from '../i18n/useT';
 import { useElevationGeometry } from '../hooks/useElevationGeometry';
 import { useElevationCursor } from '../hooks/useElevationCursor';
+import { useHoveredSegment } from '../contexts/HoveredSegment';
 import ElevationInfoBar from './ElevationInfoBar';
 
 interface Props {
@@ -25,8 +26,9 @@ const ElevationChart: React.FC<Props> = ({ points, segments }) => {
 
   const geo    = useElevationGeometry(points, zoom, containerWidth);
   const cursor = useElevationCursor(points, segments, geo.toY, geo.chartW, geo.totalDist);
+  const { hoveredKmDist } = useHoveredSegment();
 
-  const { height, paddingLeft, paddingRight, paddingTop, chartW, chartH, minZoom, totalDist, toX, toY, pathData, xTicks, yTicks } = geo;
+  const { height, paddingLeft, paddingRight, paddingTop, chartW, chartH, minZoom, totalDist, toX, toY, decimatedPoints, pathData, xTicks, yTicks } = geo;
   const { hoveredId, setHoveredId, cursorX, setCursorX, cursorDist, cursorElev, cursorMarkerY, cursorGrade, segment, handleMouseMove } = cursor;
 
   useEffect(() => {
@@ -165,9 +167,9 @@ const ElevationChart: React.FC<Props> = ({ points, segments }) => {
             {pathData && <path d={pathData} fill="#94a3b8" opacity={0.35} className="seg-overlay" />}
 
             {/* Elevation line */}
-            {points.length > 1 && (
+            {decimatedPoints.length > 1 && (
               <polyline
-                points={points.map((p) => `${toX(p.distance)},${toY(p.elevation)}`).join(' ')}
+                points={decimatedPoints.map((p) => `${toX(p.distance)},${toY(p.elevation)}`).join(' ')}
                 fill="none" stroke="#334155" strokeWidth={1.5}
                 className="seg-overlay"
               />
@@ -191,6 +193,16 @@ const ElevationChart: React.FC<Props> = ({ points, segments }) => {
                 r={3.8}
                 fill="#0f172a" stroke="#f8fafc" strokeWidth={1.2}
                 className="seg-overlay"
+              />
+            )}
+
+            {/* Km marker guide */}
+            {hoveredKmDist !== null && (
+              <line
+                x1={toX(hoveredKmDist)} y1={paddingTop}
+                x2={toX(hoveredKmDist)} y2={paddingTop + chartH}
+                stroke="#64748b" strokeWidth={1}
+                strokeDasharray="3 3" opacity={0.55}
               />
             )}
 

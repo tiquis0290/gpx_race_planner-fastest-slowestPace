@@ -25,6 +25,7 @@ const rootReducer = combineReducers({
 const persistConfig = {
   key: 'gpx-race-planner',
   storage: localStorageAdapter,
+  blacklist: ['gpx', 'segments', 'results'],
 };
 
 const persistedReducer = persistReducer(persistConfig, rootReducer);
