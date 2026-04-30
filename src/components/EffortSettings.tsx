@@ -27,6 +27,7 @@ const EffortSettings: React.FC = () => {
     const {effortModel, uphillCost, downhillBenefit, powerExponent, splitStrategy, splitStrength} = useAppSettings();
     const modelOptions: { label: string; value: EffortModel }[] = [
         {label: t.effortModelMinetti, value: 'minetti'},
+        {label: t.effortModelStravaGap, value: 'stravaGap'},
         {label: t.effortModelLinear, value: 'linear'},
         {label: t.effortModelPower, value: 'power'},
         {label: t.effortModelExponential, value: 'exponential'},
@@ -93,7 +94,7 @@ const EffortSettings: React.FC = () => {
                 </div>
             )}
 
-            {effortModel !== 'minetti' && (
+            {effortModel !== 'minetti' && effortModel !== 'stravaGap' && (
                 <div className="effort-cost-row">
                     <div className="effort-cost-item">
                         <label className="block mb-1 text-sm font-medium effort-cost-item__label">

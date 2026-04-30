@@ -3,7 +3,7 @@ import type { PayloadAction } from '@reduxjs/toolkit';
 import type { Lang } from '../i18n/translations';
 import { DEFAULT_VISIBLE_COLS } from '../config/tableColumns';
 
-export type EffortModel = 'linear' | 'power' | 'exponential' | 'minetti';
+export type EffortModel = 'linear' | 'power' | 'exponential' | 'minetti' | 'stravaGap';
 export type ColAlignment = 'left' | 'center' | 'right';
 
 interface SettingsState {

@@ -7,6 +7,7 @@ const sk = {
   resetConfirmAccept: 'Áno, obnoviť',
   resetConfirmReject: 'Zrušiť',
   downloadFit: 'Stiahnuť Garmin Workout',
+  downloadPacePro: 'Stiahnuť Garmin PacePro',
 
   gpxCard: 'GPX Súbor',
   remove: 'Odstrániť',
@@ -48,7 +49,8 @@ const sk = {
   effortModelPower: 'Mocninový',
   effortModelExponential: 'Exponenciálny',
   effortModelMinetti: 'Minetti',
-  helpEffortModel: 'Spôsob výpočtu penalizácie za sklon. Lineárny (predvolený): tempo rastie priamo úmerne sklonu. Mocninový: mierné kopce penalizuje menej, strmé viac. Exponenciálny: ešte výraznejší rozdiel. Minetti: biomechanický model z vedeckej literatúry, bez nastaviteľných parametrov.',
+  effortModelStravaGap: 'Strava GAP',
+  helpEffortModel: 'Spôsob výpočtu penalizácie za sklon. Lineárny (predvolený): tempo rastie priamo úmerne sklonu. Mocninový: mierné kopce penalizuje menej, strmé viac. Exponenciálny: ešte výraznejší rozdiel. Strava GAP: pevná nelineárna aproximácia grade adjusted pace v štýle Stravy. Minetti: biomechanický model z vedeckej literatúry, bez nastaviteľných parametrov.',
   powerExponentLabel: 'Exponent (n)',
   helpPowerExponent: 'Tvar krivky mocninového modelu. Hodnota 1 = rovnaké ako lineárny. Hodnota 1,5 (predvolená) = stredné zakrivenie. Hodnota 2 = výrazné zakrivenie — mierne kopce takmer bez penalizácie, strmé kopce výrazne viac.',
   uphillLabel: 'Stúpanie (s/km za 1%)',
