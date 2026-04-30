@@ -23,11 +23,7 @@ export function computeEffortFactor(
   }
 
   if (model === 'stravaGap') {
-    const absSlope = Math.abs(slopePct);
-    if (slopePct >= 0) {
-      return 1 + 0.035 * absSlope + 0.0015 * absSlope ** 2;
-    }
-    return Math.max(0.5, 1 - 0.02 * absSlope - 0.0008 * absSlope ** 2);
+    return 1 + 0.035 * slopePct + 0.0015 * slopePct ** 2;
   }
 
   if (slopePct >= 0) {
