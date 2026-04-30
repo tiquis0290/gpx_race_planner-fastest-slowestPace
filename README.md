@@ -1,3 +1,10 @@
+# Changed how segments are created and added custom export to garmin pace pro
+**Live demo:** [https://gpx.maslowski.cz](https://gpx.maslowski.cz)
+
+to upload custom pace pro pplan you can use my [firefox extension](https://addons.mozilla.org/en-US/firefox/addon/garminconnect-pacepro-loader/)
+
+
+
 # GPX Race Planner
 
 [![Deploy](https://github.com/martinkobelka/gpx_race_planner/actions/workflows/deploy.yml/badge.svg)](https://github.com/martinkobelka/gpx_race_planner/actions/workflows/deploy.yml)
